@@ -23,26 +23,30 @@ public class Cliente {
 
     @Column(unique = true, nullable = false)
     @NotBlank(message="El campo run no puede ser vacio")
-    @Pattern(regexp = "\\d{7,8}-¨[dkK]$", message = "El formato del run debe ser xxxxxxxxx-xx")
+    @Pattern(regexp = "\\d{7,8}-[\\dkK]$", message = "El formato del run debe ser xxxxxxxx-x")
     private String run;
 
     @Column(name = "nombre_cliente", nullable = false)
     @NotBlank(message = "El campo nombreCompleto no puede ser vacio")
     private String nombreCliente;
 
-    @Column(name = "apellido_cliente")
+    @Column(name = "apellido_cliente", nullable = false)
     @NotBlank(message = "El campo apellido no puede ser vacio")
     private String apellidoCliente;
 
+    @Column(name = "direccion_cliente", nullable = false)
     @NotBlank(message = "La direccion no puede ser vacio")
     private String direccionCliente;
 
-    @Pattern(regexp = "^(\\+56)?\\s?(9\\d{8}|[2-9]\\d{7})$",message = "El formato del teléfono debe ser +56 9XXXXXXXX o +56 XXXXXXXX")
+    @Pattern(
+            regexp = "^(\\+56)?\\s?9\\d{8}$",
+            message = "El formato del teléfono debe ser +56 9XXXXXXXX"
+    )
     private String telefono;
 
-    @Email
-    @Column(nullable = false, unique = true)
+
     @Email(message = "El correo tiene que tener formato de correo")
+    @Column(nullable = false, unique = true)
     @NotBlank(message = "El correo no puede ser vacio")
     private String emailCliente;
 
