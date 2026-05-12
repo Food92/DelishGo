@@ -5,9 +5,9 @@ import com.delishGo_MSCVs.restaurante_mscv.exception.RestaurantException;
 import com.delishGo_MSCVs.restaurante_mscv.models.Restaurant;
 import com.delishGo_MSCVs.restaurante_mscv.repositories.RestaurantRespository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,17 +17,20 @@ public class RestaurantImpl implements RestaurantService {
     @Autowired
     private RestaurantRespository restaurantRespository;
 
+    @Transactional(readOnly = true)
     @Override
     public List<Restaurant> findAll() {
         return restaurantRespository.findAll();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Restaurant findById(Long idRestaurant) {
         return restaurantRespository.findById(idRestaurant).orElseThrow(
                 ()->new RestaurantException("Restaurant con ID: "+idRestaurant + " no existe"));
     }
 
+    @Transactional
     @Override
     public Restaurant save(Restaurant restaurant) {
         if(restaurantRespository.findByCorreo(restaurant.getCorreo()).isPresent()){
@@ -41,6 +44,7 @@ public class RestaurantImpl implements RestaurantService {
 
     }
 
+    @Transactional
     @Override
     public void delete(Long idRestaurant) {
         if(!restaurantRespository.existsById(idRestaurant)){
@@ -50,6 +54,7 @@ public class RestaurantImpl implements RestaurantService {
 
     }
 
+    @Transactional
     @Override
     public Restaurant update(Long idRestaurant, Restaurant restaurant) {
         Restaurant existente = restaurantRespository.findById(idRestaurant)

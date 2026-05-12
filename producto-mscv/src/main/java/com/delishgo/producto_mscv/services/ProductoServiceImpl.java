@@ -6,6 +6,7 @@ import com.delishgo.producto_mscv.models.dtos.ProductoDTO;
 import com.delishgo.producto_mscv.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ public class ProductoServiceImpl implements ProductoService{
     @Autowired
     private ProductoRepository productoRepository;
 
+    @Transactional(readOnly = true)
     @Override
     public List<ProductoDTO> findAll() {
         return productoRepository.findAll().stream().map(p->{
@@ -29,12 +31,14 @@ public class ProductoServiceImpl implements ProductoService{
         }).toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Producto findById(Long id) {
         return productoRepository.findById(id).orElseThrow(
                 ()-> new ProductoException("El pedido con ID: " + id + " no existe"));
     }
 
+    @Transactional
     @Override
     public Producto save(Producto producto) {
         // Validación: que no exista otro producto con el mismo nombre
@@ -53,6 +57,7 @@ public class ProductoServiceImpl implements ProductoService{
         return productoRepository.save(producto);
     }
 
+    @Transactional
     @Override
     public Producto updateById(Producto producto, Long id) {
         return productoRepository.findById(id).map(p -> {
@@ -65,6 +70,7 @@ public class ProductoServiceImpl implements ProductoService{
         }).orElseThrow(() -> new ProductoException("El producto con id " + id + " no existe"));
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         productoRepository.deleteById(id);
@@ -74,11 +80,13 @@ public class ProductoServiceImpl implements ProductoService{
         return productoRepository.findByNombreProducto(nombre);
     }
 
+    @Transactional
     @Override
     public List<Producto> findByCategoria(String categoria) {
         return productoRepository.findByCategoria(categoria);
     }
 
+    @Transactional
     @Override
     public List<Producto> findByDisponible(Boolean disponible) {
         return productoRepository.findByDisponibleTrue(disponible);
