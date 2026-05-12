@@ -19,7 +19,7 @@ public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_restaurant")
-    private Long id_restaurant;
+    private Long idRestaurant;
 
     @Column(name = "nombre_restaurant", nullable = false)
     @NotBlank(message = "El campo run no puede ser vacio")
