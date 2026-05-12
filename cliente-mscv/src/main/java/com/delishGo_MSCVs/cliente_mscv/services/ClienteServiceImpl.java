@@ -21,26 +21,22 @@ public class ClienteServiceImpl implements ClienteService {
         return this.clienteRepository.findAll();
     }
 
-    @Transactional(readOnly=true)
-    @Override
-    public Cliente findByCorreo(String correo) {
-        return this.clienteRepository.findByCorreo(correo).orElseThrow(
-                ()-> new ClienteException("Cliente con con correo "+correo + " no encontrado"));
-    }
-
     @Transactional
     @Override
     public Cliente save(Cliente cliente) {
-        //Si el ID viene nulo, es nuevo registro
-        if(cliente.getIdCliente()==null){
-            Cliente save = this.save(cliente);
+        // Si el ID viene nulo, es nuevo registro
+        if (cliente.getIdCliente() == null) {
+            return clienteRepository.save(cliente);
         }
-        //Si el ID viene con valor, valiamos que no exista duplicado
-        if(clienteRepository.findById(cliente.getIdCliente()).isPresent()){
+
+        // Si el ID viene con valor, validamos que no exista duplicado
+        if (clienteRepository.findById(cliente.getIdCliente()).isPresent()) {
             throw new ClienteException("Cliente existente");
         }
+
         return clienteRepository.save(cliente);
     }
+
 
     @Transactional
     @Override
