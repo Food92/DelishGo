@@ -19,6 +19,7 @@
         <module>restaurante-mscv</module>
         <module>pedido-mscv</module>
         <module>cliente-mscv</module>
+        <module>producto-mscv</module>
     </modules>
 
     <packaging>pom</packaging>

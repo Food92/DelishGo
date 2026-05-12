@@ -26,7 +26,11 @@ public class ClienteController {
 
     @GetMapping("/{idCliente}")
     public ResponseEntity<Cliente> findById(@PathVariable Long idCliente) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.clienteService.findByIdCliente(idCliente));
+        Cliente cliente = clienteService.findByIdCliente(idCliente);
+        if (cliente == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(cliente);
     }
 
     @PostMapping
