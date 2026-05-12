@@ -13,8 +13,8 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 public class PedidoDTO {
-    private Long clienteId;
-    private Long restauranteId;
+    private Long idCliente;
+    private Long idRestaurant;
     private List<DetallePedidoDTO> detallesPedido;
     private Double montoTotal;
     private String estado;

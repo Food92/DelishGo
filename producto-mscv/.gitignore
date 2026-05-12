@@ -28,6 +28,10 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+# Ignorar archivos H2
+*.mv.db
+*.trace.db
+*.lock.db
 
 ### VS Code ###
 .vscode/

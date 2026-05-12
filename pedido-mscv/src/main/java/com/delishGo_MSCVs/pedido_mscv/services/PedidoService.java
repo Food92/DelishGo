@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface PedidoService {
     List<Pedido>findAll();
-    Pedido findById(Long id);
+    Pedido findById(Long idCliente);
     Pedido save(PedidoDTO pedidoDTO);
-    Pedido update(PedidoDTO  pedidoDTO, Long id);
+    Pedido update(PedidoDTO  pedidoDTO, Long idCliente);
     void deleteById(Long id);
 }

@@ -18,6 +18,10 @@ target/
 *.iws
 *.iml
 *.ipr
+# Ignorar archivos H2
+*.mv.db
+*.trace.db
+*.lock.db
 
 ### NetBeans ###
 /nbproject/private/

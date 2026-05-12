@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "cliente-mscv", url="localhost:8081/api/v1/clientes")
+@FeignClient(name = "cliente-mscv", url = "http://localhost:8081/api/v1/clientes")
 public interface ClienteClient {
     @GetMapping("/{idCliente}")
     ClienteDTO getClienteById(@PathVariable("idCliente") Long idCliente);
-
 }
+

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -42,54 +43,54 @@ public class PedidoServiceImpl implements PedidoService {
                 ()-> new PedidoException("Pedido con ID:" + id + "no encontrado")
         );
     }
-
     @Override
     public Pedido save(PedidoDTO pedidoDTO) {
-        //Validar cliente
-        ClienteDTO clienteDTO= clienteClient.getClienteById(pedidoDTO.getClienteId());
-        if(clienteDTO==null){
-            throw new ClienteException("Cliente no encontrado");
+        // Validar cliente
+        ClienteDTO clienteDTO = clienteClient.getClienteById(pedidoDTO.getIdCliente());
+        if (clienteDTO == null) {
+            throw new ClienteException("Cliente no encontrado con ID: " + pedidoDTO.getIdCliente());
         }
 
-        //Validar Restaurant
-        RestaurantDTO restaurantDTO= restaurantClient.getRestaurantById(pedidoDTO.getRestauranteId());
-        if(restaurantDTO==null){
-            throw new RestaurantException("Restaurante no encontrado");
+        // Validar restaurante
+        RestaurantDTO restaurantDTO = restaurantClient.getRestaurantById(pedidoDTO.getIdRestaurant());
+        if (restaurantDTO == null) {
+            throw new RestaurantException("Restaurante no encontrado con ID: " + pedidoDTO.getIdRestaurant());
         }
 
-        //Validar detalle
-        if(pedidoDTO.getDetallesPedido()==null||pedidoDTO.getDetallesPedido().isEmpty()){
+        // Validar detalles
+        if (pedidoDTO.getDetallesPedido() == null || pedidoDTO.getDetallesPedido().isEmpty()) {
             throw new PedidoException("El pedido debe tener al menos un detalle");
         }
 
-        //Valisdar producto y calcular subtotales
-        pedidoDTO.getDetallesPedido().forEach(detalle->{
-            ProductoDTO newpedido= productoClient.getAllProductos()
+        // Validar producto y calcular subtotales
+        pedidoDTO.getDetallesPedido().forEach(detalle -> {
+            ProductoDTO producto = productoClient.getAllProductos()
                     .stream()
-                    .filter(p->p.getIdProducto().equals(detalle.getIdProducto()))
+                    .filter(p -> p.getIdProducto().equals(detalle.getIdProducto()))
                     .findFirst()
-                    .orElseThrow(()-> new PedidoException("El pedido no encontrado"));
+                    .orElseThrow(() -> new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto()));
 
-            detalle.setPrecioUnitario(detalle.getPrecioUnitario());
-            detalle.setSubtotal(detalle.getCantidad()* newpedido.getPrecio());
+            detalle.setPrecioUnitario(producto.getPrecio());
+            detalle.setSubtotal(detalle.getCantidad() * producto.getPrecio());
         });
 
-        //Calcular monto total
-        double total= pedidoDTO.getDetallesPedido().stream()
+        // Calcular monto total
+        double total = pedidoDTO.getDetallesPedido().stream()
                 .mapToDouble(DetallePedidoDTO::getSubtotal)
                 .sum();
         pedidoDTO.setMontoTotal(total);
 
-        //Convertir DTO e entidad
+        // Convertir DTO a entidad
         Pedido pedido = new Pedido();
         pedido.setIdCliente(clienteDTO.getIdCliente());
         pedido.setIdRestaurant(restaurantDTO.getIdRestaurant());
-        pedido.setPrecio(pedido.getPrecio());
+        pedido.setPrecio(total); // aquí usas el total calculado
         pedido.setEstado(pedidoDTO.getEstado());
-        pedido.setHoraPedido(LocalDate.now());
+        pedido.setHoraPedido(LocalDateTime.now()); // fecha y hora actual
 
         return pedidoRepository.save(pedido);
     }
+
 
 
     @Override
