@@ -12,6 +12,10 @@ target/
 *.iws
 *.iml
 *.ipr
+# Ignorar archivos de base de datos H2
+*.mv.db
+*.trace.db
+*.lock.db
 
 ### Eclipse ###
 .apt_generated

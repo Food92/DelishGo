@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Setter
@@ -29,7 +30,7 @@ public class Pedido {
     private Double precio;
 
     @NotNull(message = "El campo de hora no puede ser vacio")
-    private LocalDate HoraPedido;
+    private LocalDateTime HoraPedido;
 
     @NotNull(message = "El campo cliente no puede ser vacio")
     @Column(nullable = false)

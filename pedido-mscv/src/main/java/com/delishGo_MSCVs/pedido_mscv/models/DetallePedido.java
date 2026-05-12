@@ -20,9 +20,9 @@ public class DetallePedido {
     @Column(name = "detalle_id")
     private Long detalleId;
 
-    @ManyToOne
-    @JoinColumn(name = "pedido_id", nullable = false)
-    private Pedido pedido;
+    @NotNull(message = "El pedido no puede ser nulo")
+    @Column(name = "pedido_id", nullable = false)
+    private Long pedidoId; // solo guardas el ID del pedido
 
     @NotNull(message = "El producto no puede ser nulo")
     @Column(name = "producto_id", nullable = false)
@@ -30,7 +30,7 @@ public class DetallePedido {
 
     @NotNull(message = "La cantidad no puede ser nula")
     @Column(nullable = false)
-    private Long cantidad;
+    private Integer cantidad;
 
     @NotNull(message = "El precio unitario no puede ser nulo")
     @Column(name = "precio_unitario", nullable = false)
@@ -42,7 +42,7 @@ public class DetallePedido {
 
     private String observacion;
 
-    //Metodo
+    // Método para calcular subtotal
     public void calcularSubtotal() {
         if (cantidad != null && precioUnitario != null) {
             this.subtotal = cantidad * precioUnitario;
@@ -51,3 +51,4 @@ public class DetallePedido {
         }
     }
 }
+
