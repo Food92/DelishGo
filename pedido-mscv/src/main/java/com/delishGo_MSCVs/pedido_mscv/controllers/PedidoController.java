@@ -2,6 +2,7 @@ package com.delishGo_MSCVs.pedido_mscv.controllers;
 
 import com.delishGo_MSCVs.pedido_mscv.models.Pedido;
 import com.delishGo_MSCVs.pedido_mscv.models.dtos.PedidoDTO;
+import com.delishGo_MSCVs.pedido_mscv.models.dtos.PedidoResponseDTO;
 import com.delishGo_MSCVs.pedido_mscv.services.PedidoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/pedidos")
@@ -20,18 +23,47 @@ public class PedidoController {
     private PedidoService pedidoService;
 
     @GetMapping
-    public ResponseEntity<List<Pedido>>findAll(){
-        return ResponseEntity.status(HttpStatus.OK).body(this.pedidoService.findAll());
+    public ResponseEntity<List<PedidoResponseDTO>> getAllPedidos() {
+        return ResponseEntity.ok(pedidoService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> findById(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(this.pedidoService.findById(id));
+    public ResponseEntity<PedidoResponseDTO> findById(@PathVariable Long id) {
+        PedidoResponseDTO response = pedidoService.findById(id);
+        System.out.println("Controller devuelve: " + response);
+        return ResponseEntity.ok(response);
     }
 
+
+
     @PostMapping
-    public ResponseEntity<Pedido> save(@Valid @RequestBody PedidoDTO pedidoDTO){
-        return ResponseEntity.status(HttpStatus.OK).body(this.pedidoService.save(pedidoDTO));
+    public ResponseEntity<PedidoResponseDTO> save(@Valid @RequestBody PedidoDTO pedidoDTO) {
+        PedidoResponseDTO response = this.pedidoService.save(pedidoDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+
+    // Actualizar pedido
+    @PutMapping("/{id}")
+    public ResponseEntity<PedidoResponseDTO> updatePedido(@PathVariable Long id,
+                                                          @RequestBody PedidoDTO pedidoDTO) {
+        PedidoResponseDTO pedidoActualizado = pedidoService.update(id, pedidoDTO);
+        return ResponseEntity.ok(pedidoActualizado);
+    }
+
+
+
+    // Eliminar pedido
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deletePedido(@PathVariable Long id) {
+        pedidoService.deleteById(id);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Pedido con ID " + id + " eliminado correctamente");
+
+        return ResponseEntity.ok(response); // 200 OK con mensaje
+    }
+
+
 
 }
