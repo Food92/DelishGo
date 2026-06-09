@@ -1265,3 +1265,7 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: U:/Java/Preuba2/
 	at org.h2.mvstore.SingleFileStore.open(SingleFileStore.java:81)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:291)
 	... 45 more
+2026-06-08 19:07:50.991518-04:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]CLIENTES CLIENTES"; se esperaba "COMMIT, CREATE, CALL, CHECKPOINT, COMMENT"
+Syntax error in SQL statement "[*]CLIENTES CLIENTES"; expected "COMMIT, CREATE, CALL, CHECKPOINT, COMMENT"; SQL statement:
+CLIENTES CLIENTES [42001-240]

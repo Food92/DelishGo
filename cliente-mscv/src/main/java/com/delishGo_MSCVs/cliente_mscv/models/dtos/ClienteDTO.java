@@ -1,14 +1,14 @@
 package com.delishGo_MSCVs.cliente_mscv.models.dtos;
 
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
 @NoArgsConstructor
-@Table
+@ToString
 public class ClienteDTO {
     private Long idCliente;
     private String run;

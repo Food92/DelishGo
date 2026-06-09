@@ -9,21 +9,25 @@ import lombok.ToString;
 
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @ToString
 public class DetallePedidoDTO {
-    private Long idProducto;       // ID del producto
-    private Long cantidad;      // cantidad solicitada
-    private Double precioUnitario; // se calcula en el service
-    //private Double subtotal;       // cantidad * precioUnitario
-    private String observacion;    // comentario opcional del cliente
 
-    @Transient
-    public Double getSubtotal(){
+    private Long idPedido;
+    private Long idDetalle;
+    private Long idProducto;        // ID del producto
+    private Integer cantidad;       // cantidad solicitada
+    private Double precioUnitario;  // precio del producto
+    private Double subtotal;        // cantidad * precioUnitario
+    private String observacion;     // comentario opcional del cliente
+
+    // Calcular subtotal dinámicamente
+    public Double getSubtotal() {
         return (cantidad != null && precioUnitario != null)
-                ? cantidad * precioUnitario : 0.0;
+                ? cantidad * precioUnitario
+                : 0.0;
     }
 
 }

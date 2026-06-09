@@ -12,6 +12,11 @@ public interface PedidoService {
     PedidoResponseDTO save(PedidoDTO pedidoDTO);
     PedidoResponseDTO update(Long id, PedidoDTO pedidoDTO);
     void deleteById(Long id);
+
+    // 🔎 Filtros adicionales
+    List<PedidoResponseDTO> findByIdCliente(Long idCliente);
+    List<PedidoResponseDTO> findByIdRestaurant(Long idRestaurant);
+    List<PedidoResponseDTO> findByEstado(String estado);
 }
 
 

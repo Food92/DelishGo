@@ -15,47 +15,47 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Setter
-@Getter
-@NoArgsConstructor
 @Table(name = "pedidos")
+@Getter
+@Setter
+@NoArgsConstructor
 @ToString
 public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idPedido;
 
-    @NotNull(message = "El campo de estado no puede ser vacio")
+    @NotNull(message = "El campo de estado no puede ser vacío")
     @Column(nullable = false)
     private String estado;
 
-    @JsonIgnore
     @Column(nullable = false)
-    private Double precio;
+    private Double montoTotal; // ✅ total del pedido
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime horaPedido;
 
-
-    @NotNull(message = "El campo cliente no puede ser vacio")
+    @NotNull(message = "El campo cliente no puede ser vacío")
     @Column(nullable = false)
     private Long idCliente;
 
-    @NotNull(message = "El campo de restaurant no puede ser vacio")
+    @NotNull(message = "El campo restaurante no puede ser vacío")
     @Column(nullable = false)
     private Long idRestaurant;
 
     @Transient
-    private List<DetallePedidoDTO> detalles;
+    private List<DetallePedidoDTO> detalles; // ✅ no se persiste, viene del microservicio de detalles
 
-    //Calcula monto total
-    public  Double calcularTotal(){
-        if(detalles == null || detalles.isEmpty()){
+    // Calcula monto total
+    public Double calcularTotal() {
+        if (detalles == null || detalles.isEmpty()) {
             return 0.0;
         }
         return detalles.stream().mapToDouble(DetallePedidoDTO::getSubtotal).sum();
     }
 
-    private Audit audit = new Audit();
 
+
+
+    private Audit audit = new Audit();
 }

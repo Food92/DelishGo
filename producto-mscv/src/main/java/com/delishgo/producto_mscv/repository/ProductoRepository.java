@@ -10,7 +10,14 @@ import java.util.Optional;
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
    List<Producto> findByCategoria(String categoria);
 
-   List<Producto> findByDisponibleTrue(Boolean disponible);
+   List<Producto> findByDisponible( Boolean disponible);
 
    Optional<Producto> findByNombreProducto(String nombreProducto);
+
+   //  productos por restaurante
+   List<Producto> findByIdRestaurante(Long idRestaurante);
+
+   // Opcional: combinaciones
+   List<Producto> findByCategoriaAndDisponible(String categoria, Boolean disponible);
+   List<Producto> findByIdRestauranteAndDisponible(Long idRestaurante, Boolean disponible);
 }

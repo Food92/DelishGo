@@ -52,4 +52,9 @@ public class Cliente {
 
     @Embedded
     private Audit audit = new Audit();
+
+    @Column(nullable = false)
+    private Boolean activo = true;
+
+    
 }

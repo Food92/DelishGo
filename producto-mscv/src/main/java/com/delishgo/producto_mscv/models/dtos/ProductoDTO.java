@@ -16,4 +16,5 @@ public class ProductoDTO {
     private Double precio;
     private String categoria;
     private Boolean disponible;
+    private Long idRestaurante;
 }

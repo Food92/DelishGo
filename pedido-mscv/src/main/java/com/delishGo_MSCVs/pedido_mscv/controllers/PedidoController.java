@@ -19,29 +19,29 @@ import java.util.Map;
 @RequestMapping("/api/v1/pedidos")
 @Validated
 public class PedidoController {
+
     @Autowired
     private PedidoService pedidoService;
 
+    // Obtener todos los pedidos
     @GetMapping
     public ResponseEntity<List<PedidoResponseDTO>> getAllPedidos() {
         return ResponseEntity.ok(pedidoService.findAll());
     }
 
+    // Obtener pedido por ID
     @GetMapping("/{id}")
     public ResponseEntity<PedidoResponseDTO> findById(@PathVariable Long id) {
         PedidoResponseDTO response = pedidoService.findById(id);
-        System.out.println("Controller devuelve: " + response);
         return ResponseEntity.ok(response);
     }
 
-
-
+    // Crear pedido
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> save(@Valid @RequestBody PedidoDTO pedidoDTO) {
-        PedidoResponseDTO response = this.pedidoService.save(pedidoDTO);
+        PedidoResponseDTO response = pedidoService.save(pedidoDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
 
     // Actualizar pedido
     @PutMapping("/{id}")
@@ -51,19 +51,32 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoActualizado);
     }
 
-
-
     // Eliminar pedido
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deletePedido(@PathVariable Long id) {
         pedidoService.deleteById(id);
-
         Map<String, String> response = new HashMap<>();
         response.put("message", "Pedido con ID " + id + " eliminado correctamente");
-
-        return ResponseEntity.ok(response); // 200 OK con mensaje
+        return ResponseEntity.ok(response);
     }
 
+    // 🔎 Buscar pedidos por cliente
+    @GetMapping("/cliente/{idCliente}")
+    public ResponseEntity<List<PedidoResponseDTO>> getByCliente(@PathVariable Long idCliente) {
+        return ResponseEntity.ok(pedidoService.findByIdCliente(idCliente));
+    }
+
+    // 🔎 Buscar pedidos por restaurante
+    @GetMapping("/restaurante/{idRestaurant}")
+    public ResponseEntity<List<PedidoResponseDTO>> getByRestaurante(@PathVariable Long idRestaurant) {
+        return ResponseEntity.ok(pedidoService.findByIdRestaurant(idRestaurant));
+    }
+
+    // 🔎 Buscar pedidos por estado
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<PedidoResponseDTO>> getByEstado(@PathVariable String estado) {
+        return ResponseEntity.ok(pedidoService.findByEstado(estado));
+    }
 
 
 }

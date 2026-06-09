@@ -17,5 +17,9 @@ public interface ProductoService {
     Optional<Producto> findByNombre(String nombre);
     List<Producto> findByCategoria(String categoria);
     List<Producto> findByDisponible(Boolean disponible);
+
+    // 🔗 nuevo: productos por restaurante
+    List<Producto> findByIdRestaurante(Long idRestaurante);
 }
+
 

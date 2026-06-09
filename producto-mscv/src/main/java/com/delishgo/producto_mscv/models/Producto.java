@@ -19,6 +19,10 @@ public class Producto {
     private Long idProducto;
 
 
+    @NotNull(message = "El id del restaurante no puede ser nulo")
+    @Column(name="id_restaurante", nullable = false)
+    private Long idRestaurante;
+
     @NotNull(message = "El nombre del producto no puede estar vacío")
     @Column(name="nombre_producto", nullable = false)
     private String nombreProducto;

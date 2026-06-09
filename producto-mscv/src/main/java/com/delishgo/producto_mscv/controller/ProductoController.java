@@ -15,21 +15,30 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/productos")
 public class ProductoController {
+
     @Autowired
     private ProductoService productoService;
 
+    // Obtener todos los productos
     @GetMapping
     public ResponseEntity<List<ProductoDTO>> getAllProductos() {
         return ResponseEntity.ok(productoService.findAll());
     }
 
+    // Obtener producto por ID
     @GetMapping("/{id}")
     public ResponseEntity<Producto> getProducto(@PathVariable Long id) {
         return ResponseEntity.ok(productoService.findById(id));
     }
 
+    // Crear producto
+    @PostMapping
+    public ResponseEntity<Producto> saveProducto(@RequestBody Producto producto) {
+        Producto saved = productoService.save(producto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
 
-
+    // Actualizar producto por ID
     @PutMapping("/{id}")
     public ResponseEntity<Producto> updateProducto(@Valid @RequestBody Producto producto, @PathVariable Long id) {
         return ResponseEntity
@@ -37,30 +46,35 @@ public class ProductoController {
                 .body(productoService.updateById(producto, id));
     }
 
+    // Eliminar producto por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProducto(@PathVariable Long id) {
         productoService.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    // Buscar por nombre
     @GetMapping("/nombre/{nombre}")
     public ResponseEntity<Optional<Producto>> getByNombre(@PathVariable String nombre) {
         return ResponseEntity.ok(productoService.findByNombre(nombre));
     }
 
+    // Buscar por categoría
     @GetMapping("/categoria/{categoria}")
     public ResponseEntity<List<Producto>> getByCategoria(@PathVariable String categoria) {
         return ResponseEntity.ok(productoService.findByCategoria(categoria));
     }
 
+    // Buscar por disponibilidad
     @GetMapping("/disponible/{disponible}")
     public ResponseEntity<List<Producto>> getByDisponible(@PathVariable Boolean disponible) {
         return ResponseEntity.ok(productoService.findByDisponible(disponible));
     }
 
-    @PostMapping
-    public ResponseEntity<Producto> saveProducto(@RequestBody Producto producto) {
-        Producto saved = productoService.save(producto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    // 🔗 Nuevo: buscar productos por restaurante
+    @GetMapping("/restaurante/{idRestaurante}")
+    public ResponseEntity<List<Producto>> getByIdRestaurante(@PathVariable Long idRestaurante) {
+        return ResponseEntity.ok(productoService.findByIdRestaurante(idRestaurante));
     }
 }
+

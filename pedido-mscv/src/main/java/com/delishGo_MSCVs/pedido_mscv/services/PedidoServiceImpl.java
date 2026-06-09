@@ -2,6 +2,7 @@ package com.delishGo_MSCVs.pedido_mscv.services;
 
 import com.delishGo_MSCVs.cliente_mscv.exception.ClienteException;
 import com.delishGo_MSCVs.pedido_mscv.client.ClienteClient;
+import com.delishGo_MSCVs.pedido_mscv.client.DetallePedidoClient;
 import com.delishGo_MSCVs.pedido_mscv.client.ProductoClient;
 import com.delishGo_MSCVs.pedido_mscv.client.RestaurantClient;
 import com.delishGo_MSCVs.pedido_mscv.exception.PedidoException;
@@ -34,46 +35,17 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public List<PedidoResponseDTO> findAll() {
-        return pedidoRepository.findAll().stream().map(p -> {
-            PedidoResponseDTO response = new PedidoResponseDTO();
-            response.setIdPedido(p.getIdPedido());
-            response.setEstado(p.getEstado());
-            response.setHoraPedido(p.getHoraPedido());
-            response.setIdCliente(p.getIdCliente());
-
-            response.setIdRestaurant(p.getIdRestaurant());
-
-            // ⚠️ Como no persistes detalles en BD, devuelves lista vacía
-            response.setDetallesPedido(Collections.emptyList());
-            // Usas el precio guardado como montoTotal
-            response.setMontoTotal(p.getPrecio());
-
-            return response;
-        }).collect(Collectors.toList());
+        return pedidoRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
-
 
     @Override
     public PedidoResponseDTO findById(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoException("Pedido con ID:" + id + " no encontrado"));
-
-        PedidoResponseDTO response = new PedidoResponseDTO();
-        response.setIdPedido(pedido.getIdPedido());
-        response.setEstado(pedido.getEstado());
-        response.setHoraPedido(pedido.getHoraPedido());
-        response.setIdCliente(pedido.getIdCliente());
-        response.setIdRestaurant(pedido.getIdRestaurant());
-        response.setDetallesPedido(Collections.emptyList()); // o tu lógica de subtotales
-        response.setMontoTotal(pedido.getPrecio());
-
-        return response;
+        return mapToResponse(pedido);
     }
-
-
-
-
-
 
     @Override
     public PedidoResponseDTO save(PedidoDTO pedidoDTO) {
@@ -96,12 +68,10 @@ public class PedidoServiceImpl implements PedidoService {
 
         // Validar productos y asignar precio unitario
         pedidoDTO.getDetallesPedido().forEach(detalle -> {
-            ProductoDTO producto = productoClient.getAllProductos()
-                    .stream()
-                    .filter(p -> p.getIdProducto().equals(detalle.getIdProducto()))
-                    .findFirst()
-                    .orElseThrow(() -> new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto()));
-
+            ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
+            if (producto == null) {
+                throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
+            }
             detalle.setPrecioUnitario(producto.getPrecio());
         });
 
@@ -109,27 +79,21 @@ public class PedidoServiceImpl implements PedidoService {
         double total = pedidoDTO.getDetallesPedido().stream()
                 .mapToDouble(DetallePedidoDTO::getSubtotal)
                 .sum();
-        pedidoDTO.setMontoTotal(total);
 
-        // Guardar pedido en BD
+        // Guardar pedido
         Pedido pedido = new Pedido();
         pedido.setIdCliente(clienteDTO.getIdCliente());
         pedido.setIdRestaurant(restaurantDTO.getIdRestaurant());
-        pedido.setPrecio(total);
+        pedido.setMontoTotal(total);
         pedido.setEstado(pedidoDTO.getEstado());
         pedido.setHoraPedido(LocalDateTime.now());
-        pedidoRepository.save(pedido);
 
-        // Construir respuesta
-        PedidoResponseDTO response = new PedidoResponseDTO();
-        response.setIdPedido(pedido.getIdPedido());
-        response.setEstado(pedido.getEstado());
-        response.setHoraPedido(pedido.getHoraPedido());
-        response.setIdCliente(pedido.getIdCliente());
-        response.setIdRestaurant(pedido.getIdRestaurant());
+        Pedido savedPedido = pedidoRepository.save(pedido);
+
+        // Respuesta (solo devuelve lo que vino en el DTO)
+        PedidoResponseDTO response = mapToResponse(savedPedido);
         response.setDetallesPedido(pedidoDTO.getDetallesPedido());
         response.setMontoTotal(total);
-
         return response;
     }
 
@@ -141,35 +105,71 @@ public class PedidoServiceImpl implements PedidoService {
         // Actualizar estado
         pedido.setEstado(pedidoDTO.getEstado());
 
-        // Recalcular monto total si cambian detalles
+        // Validar productos y recalcular
+        pedidoDTO.getDetallesPedido().forEach(detalle -> {
+            ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
+            if (producto == null) {
+                throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
+            }
+            detalle.setPrecioUnitario(producto.getPrecio());
+        });
+
         double total = pedidoDTO.getDetallesPedido().stream()
                 .mapToDouble(DetallePedidoDTO::getSubtotal)
                 .sum();
-        pedido.setPrecio(total);
+
+        pedido.setMontoTotal(total);
         pedido.setHoraPedido(LocalDateTime.now());
+        Pedido updatedPedido = pedidoRepository.save(pedido);
 
-        pedidoRepository.save(pedido);
+        PedidoResponseDTO response = mapToResponse(updatedPedido);
+        response.setDetallesPedido(pedidoDTO.getDetallesPedido());
+        response.setMontoTotal(total);
+        return response;
+    }
 
-        // Construir respuesta
+    @Override
+    public void deleteById(Long id) {
+        if (!pedidoRepository.existsById(id)) {
+            throw new PedidoException("Pedido con ID:" + id + " no encontrado");
+        }
+        pedidoRepository.deleteById(id);
+    }
+
+    @Override
+    public List<PedidoResponseDTO> findByIdCliente(Long idCliente) {
+        return pedidoRepository.findByIdCliente(idCliente).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PedidoResponseDTO> findByIdRestaurant(Long idRestaurant) {
+        return pedidoRepository.findByIdRestaurant(idRestaurant).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PedidoResponseDTO> findByEstado(String estado) {
+        return pedidoRepository.findByEstado(estado).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // 🔧 Método privado para mapear entidad → DTO
+    private PedidoResponseDTO mapToResponse(Pedido pedido) {
         PedidoResponseDTO response = new PedidoResponseDTO();
         response.setIdPedido(pedido.getIdPedido());
         response.setEstado(pedido.getEstado());
         response.setHoraPedido(pedido.getHoraPedido());
         response.setIdCliente(pedido.getIdCliente());
         response.setIdRestaurant(pedido.getIdRestaurant());
-        response.setDetallesPedido(pedidoDTO.getDetallesPedido());
-        response.setMontoTotal(total);
+        response.setMontoTotal(pedido.getMontoTotal());
+
+        // ⚠️ Antes solo devolvías los detalles del DTO, no llamabas al microservicio
+        response.setDetallesPedido(Collections.emptyList());
 
         return response;
-    }
-
-
-    @Override
-    public void deleteById(Long id) {
-        if(!pedidoRepository.existsById(id)){
-            throw new PedidoException("Pedido con ID:" + id + "no encontrado");
-        }
-        pedidoRepository.deleteById(id);
-
     }
 }
