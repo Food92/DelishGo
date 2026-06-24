@@ -1,20 +1,16 @@
 package com.delishGo_MSCVs.pedido_mscv.services;
 
-import com.delishGo_MSCVs.cliente_mscv.exception.ClienteException;
 import com.delishGo_MSCVs.pedido_mscv.client.ClienteClient;
-import com.delishGo_MSCVs.pedido_mscv.client.DetallePedidoClient;
 import com.delishGo_MSCVs.pedido_mscv.client.ProductoClient;
 import com.delishGo_MSCVs.pedido_mscv.client.RestaurantClient;
-import com.delishGo_MSCVs.pedido_mscv.exception.PedidoException;
+import com.delishGo_MSCVs.pedido_mscv.exception.PedidoException; // Usamos solo excepciones locales
 import com.delishGo_MSCVs.pedido_mscv.models.Pedido;
 import com.delishGo_MSCVs.pedido_mscv.models.dtos.*;
 import com.delishGo_MSCVs.pedido_mscv.repositories.PedidoRepository;
-import com.delishGo_MSCVs.restaurante_mscv.exception.RestaurantException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,95 +39,95 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public PedidoResponseDTO findById(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new PedidoException("Pedido con ID:" + id + " no encontrado"));
+                .orElseThrow(() -> new PedidoException("Pedido con ID: " + id + " no encontrado"));
         return mapToResponse(pedido);
     }
 
     @Override
     public PedidoResponseDTO save(PedidoDTO pedidoDTO) {
-        // Validar cliente
+        // 1. Validar cliente (Lanza excepción local si falla)
         ClienteDTO clienteDTO = clienteClient.getClienteById(pedidoDTO.getIdCliente());
         if (clienteDTO == null) {
-            throw new ClienteException("Cliente no encontrado con ID: " + pedidoDTO.getIdCliente());
+            throw new PedidoException("No se puede crear el pedido: Cliente no encontrado con ID: " + pedidoDTO.getIdCliente());
         }
 
-        // Validar restaurante
+        // 2. Validar restaurante
         RestaurantDTO restaurantDTO = restaurantClient.getRestaurantById(pedidoDTO.getIdRestaurant());
         if (restaurantDTO == null) {
-            throw new RestaurantException("Restaurante no encontrado con ID: " + pedidoDTO.getIdRestaurant());
+            throw new PedidoException("No se puede crear el pedido: Restaurante no encontrado con ID: " + pedidoDTO.getIdRestaurant());
         }
 
-        // Validar detalles
+        // 3. Validar detalles vacíos
         if (pedidoDTO.getDetallesPedido() == null || pedidoDTO.getDetallesPedido().isEmpty()) {
-            throw new PedidoException("El pedido debe tener al menos un detalle");
+            throw new PedidoException("El pedido debe tener al menos un producto en el detalle");
         }
 
-        // Validar productos y asignar precio unitario
-        pedidoDTO.getDetallesPedido().forEach(detalle -> {
+        // 4. Validar productos y calcular subtotales y totales de manera segura en el Backend
+        double totalPedido = 0.0;
+        for (DetallePedidoDTO detalle : pedidoDTO.getDetallesPedido()) {
             ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
             if (producto == null) {
                 throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
             }
+
+            // Forzar los valores reales del catálogo de productos
             detalle.setPrecioUnitario(producto.getPrecio());
-        });
+            double subtotal = producto.getPrecio() * detalle.getCantidad();
+            detalle.setSubtotal(subtotal);
 
-        // Calcular monto total
-        double total = pedidoDTO.getDetallesPedido().stream()
-                .mapToDouble(DetallePedidoDTO::getSubtotal)
-                .sum();
+            totalPedido += subtotal;
+        }
 
-        // Guardar pedido
+        // 5. Guardar entidad Pedido
         Pedido pedido = new Pedido();
         pedido.setIdCliente(clienteDTO.getIdCliente());
         pedido.setIdRestaurant(restaurantDTO.getIdRestaurant());
-        pedido.setMontoTotal(total);
+        pedido.setMontoTotal(totalPedido);
         pedido.setEstado(pedidoDTO.getEstado());
         pedido.setHoraPedido(LocalDateTime.now());
 
         Pedido savedPedido = pedidoRepository.save(pedido);
 
-        // Respuesta (solo devuelve lo que vino en el DTO)
+        // 6. Mapear respuesta final incluyendo los detalles procesados
         PedidoResponseDTO response = mapToResponse(savedPedido);
         response.setDetallesPedido(pedidoDTO.getDetallesPedido());
-        response.setMontoTotal(total);
         return response;
     }
 
     @Override
     public PedidoResponseDTO update(Long id, PedidoDTO pedidoDTO) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new PedidoException("Pedido con ID:" + id + " no encontrado"));
+                .orElseThrow(() -> new PedidoException("Pedido con ID: " + id + " no encontrado"));
 
-        // Actualizar estado
         pedido.setEstado(pedidoDTO.getEstado());
 
-        // Validar productos y recalcular
-        pedidoDTO.getDetallesPedido().forEach(detalle -> {
-            ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
-            if (producto == null) {
-                throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
+        if (pedidoDTO.getDetallesPedido() != null && !pedidoDTO.getDetallesPedido().isEmpty()) {
+            double totalPedido = 0.0;
+            for (DetallePedidoDTO detalle : pedidoDTO.getDetallesPedido()) {
+                ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
+                if (producto == null) {
+                    throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
+                }
+                detalle.setPrecioUnitario(producto.getPrecio());
+                double subtotal = producto.getPrecio() * detalle.getCantidad();
+                detalle.setSubtotal(subtotal);
+                totalPedido += subtotal;
             }
-            detalle.setPrecioUnitario(producto.getPrecio());
-        });
+            pedido.setMontoTotal(totalPedido);
+        }
 
-        double total = pedidoDTO.getDetallesPedido().stream()
-                .mapToDouble(DetallePedidoDTO::getSubtotal)
-                .sum();
-
-        pedido.setMontoTotal(total);
         pedido.setHoraPedido(LocalDateTime.now());
         Pedido updatedPedido = pedidoRepository.save(pedido);
 
         PedidoResponseDTO response = mapToResponse(updatedPedido);
         response.setDetallesPedido(pedidoDTO.getDetallesPedido());
-        response.setMontoTotal(total);
         return response;
     }
 
     @Override
     public void deleteById(Long id) {
         if (!pedidoRepository.existsById(id)) {
-            throw new PedidoException("Pedido con ID:" + id + " no encontrado");
+            throw new PedidoException("Pedido con ID: " + id + " no encontrado");
         }
         pedidoRepository.deleteById(id);
     }
@@ -157,7 +153,6 @@ public class PedidoServiceImpl implements PedidoService {
                 .collect(Collectors.toList());
     }
 
-    // 🔧 Método privado para mapear entidad → DTO
     private PedidoResponseDTO mapToResponse(Pedido pedido) {
         PedidoResponseDTO response = new PedidoResponseDTO();
         response.setIdPedido(pedido.getIdPedido());
@@ -167,8 +162,10 @@ public class PedidoServiceImpl implements PedidoService {
         response.setIdRestaurant(pedido.getIdRestaurant());
         response.setMontoTotal(pedido.getMontoTotal());
 
-        // ⚠️ Antes solo devolvías los detalles del DTO, no llamabas al microservicio
-        response.setDetallesPedido(Collections.emptyList());
+        // NOTA: Si cuentas con un DetallePedidoClient o repositorio de detalles de pedido,
+        // aquí deberías buscar los detalles asociados a 'pedido.getIdPedido()' e inyectarlos.
+        // Por ahora, se inicializa vacío de manera segura para evitar NullPointerException.
+        response.setDetallesPedido(new java.util.ArrayList<>());
 
         return response;
     }
