@@ -22,25 +22,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # 1. Instalamos Cliente en la bóveda de Maven (Pedido lo necesita)
-      - name: Build and install cliente-mscv
-        working-directory: cliente-mscv
+      # CON ESTO SE COMPILA TODO EL BACKEND EN ORDEN DE FORMA AUTOMÁTICA
+      - name: Build and install entire backend project
         run: mvn clean install -B
-
-      # 2. Instalamos Restaurante en la bóveda de Maven (Pedido lo necesita)
-      - name: Build and install restaurante-mscv
-        working-directory: restaurante-mscv
-        run: mvn clean install -B
-
-      # 3. Producto es independiente, lo instalamos igual
-      - name: Build and install producto-mscv
-        working-directory: producto-mscv
-        run: mvn clean install -B
-
-      # 4. Pedido se compila al final: ahora SÍ encontrará las dependencias instaladas previamente
-      - name: Build and test pedido-mscv
-        working-directory: pedido-mscv
-        run: mvn clean verify -B
 
   build-and-test-frontend:
     runs-on: ubuntu-latest
