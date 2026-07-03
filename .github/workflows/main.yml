@@ -112,11 +112,11 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           
-          # 4. Microservicio Restaurante (Sincronizado con AWS: 'restaurant' sin e)
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG ./restaurant-mscv
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
+          # 4. Microservicio Restaurante (Carpeta con 'e', Repositorio AWS sin 'e')
+               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG ./restaurante-mscv
+               docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG
+               docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
+               docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
 
           # 5. Frontend delishgo
           docker build \
