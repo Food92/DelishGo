@@ -1,0 +1,1018 @@
+Index: DelishGo/pedido-mscv/src/main/resources/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.application.name=pedido-mscv\r\nserver.port=8083\r\nspring.datasource.url=jdbc:h2:file:./data/pedidos\r\nspring.datasource.driver-class-name=org.h2.Driver\r\n\r\nspring.datasource.username=sa\r\nspring.datasource.password=sa\r\n\r\nspring.jpa.database-platform=org.hibernate.dialect.H2Dialect\r\nspring.jpa.hibernate.ddl-auto=create\r\n\r\n# Consola de administración de H2\r\nspring.h2.console.enabled=true\r\nspring.h2.console.path=/h2-console\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/pedido-mscv/src/main/resources/application.properties b/DelishGo/pedido-mscv/src/main/resources/application.properties
+--- a/DelishGo/pedido-mscv/src/main/resources/application.properties	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/pedido-mscv/src/main/resources/application.properties	(date 1782978106011)
+@@ -1,14 +1,13 @@
+ spring.application.name=pedido-mscv
+ server.port=8083
+-spring.datasource.url=jdbc:h2:file:./data/pedidos
+-spring.datasource.driver-class-name=org.h2.Driver
+ 
+-spring.datasource.username=sa
+-spring.datasource.password=sa
++# Configuración para PostgreSQL local en Windows
++spring.datasource.url=jdbc:postgresql://host.docker.internal:5432/pedidos_db
++spring.datasource.username=postgres
++spring.datasource.password=Jesusestlatjrs92
++spring.datasource.driver-class-name=org.postgresql.Driver
+ 
+-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+-spring.jpa.hibernate.ddl-auto=create
+-
+-# Consola de administración de H2
+-spring.h2.console.enabled=true
+-spring.h2.console.path=/h2-console
++# Configuración de Hibernate/JPA para Postgres
++spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
++spring.jpa.hibernate.ddl-auto=update
++spring.jpa.show-sql=true
+\ No newline at end of file
+Index: DelishGo/cliente-mscv/src/main/resources/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.application.name=cliente-mscv\r\nserver.port=8081\r\nspring.datasource.url=jdbc:h2:file:./data/clientes\r\nspring.datasource.driver-class-name=org.h2.Driver\r\n\r\nspring.datasource.username=sa\r\nspring.datasource.password=sa\r\n\r\nspring.jpa.database-platform=org.hibernate.dialect.H2Dialect\r\nspring.jpa.hibernate.ddl-auto=create\r\n\r\n# Consola de administración de H2\r\nspring.h2.console.enabled=true\r\nspring.h2.console.path=/h2-console\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/cliente-mscv/src/main/resources/application.properties b/DelishGo/cliente-mscv/src/main/resources/application.properties
+--- a/DelishGo/cliente-mscv/src/main/resources/application.properties	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/cliente-mscv/src/main/resources/application.properties	(date 1782978031853)
+@@ -1,14 +1,16 @@
+ spring.application.name=cliente-mscv
++
++
+ server.port=8081
+-spring.datasource.url=jdbc:h2:file:./data/clientes
+-spring.datasource.driver-class-name=org.h2.Driver
+ 
+-spring.datasource.username=sa
+-spring.datasource.password=sa
++# Configuración de conexión para PostgreSQL (Usa variables que inyectará Docker)
++spring.datasource.url=jdbc:postgresql://host.docker.internal:5432/clientes_db
++spring.datasource.username=postgres
++spring.datasource.password=Jesusestlatjrs92
++spring.datasource.driver-class-name=org.postgresql.Driver
+ 
+-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+-spring.jpa.hibernate.ddl-auto=create
+-
+-# Consola de administración de H2
+-spring.h2.console.enabled=true
+-spring.h2.console.path=/h2-console
++# Configuración de Hibernate para interactuar con Postgres
++spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
++# 'update' creará las tablas automáticamente en Postgres sin borrar tus datos cada vez que reinicies
++spring.jpa.hibernate.ddl-auto=update
++spring.jpa.show-sql=true
+Index: DelishGo/restaurante-mscv/src/main/resources/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.application.name=restaurante-mscv\r\n\r\nserver.port=8080\r\nspring.datasource.url=jdbc:h2:file:./data/restaurants\r\nspring.datasource.driver-class-name=org.h2.Driver\r\n\r\nspring.datasource.username=sa\r\nspring.datasource.password=sa\r\n\r\nspring.jpa.database-platform=org.hibernate.dialect.H2Dialect\r\nspring.jpa.hibernate.ddl-auto=create\r\n\r\n# Consola de administración de H2\r\nspring.h2.console.enabled=true\r\nspring.h2.console.path=/h2-console\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/restaurante-mscv/src/main/resources/application.properties b/DelishGo/restaurante-mscv/src/main/resources/application.properties
+--- a/DelishGo/restaurante-mscv/src/main/resources/application.properties	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/restaurante-mscv/src/main/resources/application.properties	(date 1782978175355)
+@@ -1,16 +1,14 @@
+ spring.application.name=restaurante-mscv
+-
+-server.port=8080
+-spring.datasource.url=jdbc:h2:file:./data/restaurants
+-spring.datasource.driver-class-name=org.h2.Driver
++server.port=8085
+ 
+-spring.datasource.username=sa
+-spring.datasource.password=sa
++# Configuración CORRECTA para IntelliJ local
++spring.datasource.url=jdbc:postgresql://host.docker.internal:5432/restaurantes_db
++spring.datasource.username=postgres
++spring.datasource.password=Jesusestlatjrs92
+ 
+-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+-spring.jpa.hibernate.ddl-auto=create
++spring.datasource.driver-class-name=org.postgresql.Driver
+ 
+-# Consola de administración de H2
+-spring.h2.console.enabled=true
+-spring.h2.console.path=/h2-console
+-
++# Configuración de Hibernate
++spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
++spring.jpa.hibernate.ddl-auto=update
++spring.jpa.show-sql=true
+\ No newline at end of file
+Index: DelishGo/producto-mscv/src/main/resources/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.application.name=producto-mscv\r\n\r\nserver.port=8082\r\nspring.datasource.url=jdbc:h2:file:./data/productos\r\nspring.datasource.driver-class-name=org.h2.Driver\r\n\r\nspring.datasource.username=sa\r\nspring.datasource.password=sa\r\n\r\nspring.jpa.database-platform=org.hibernate.dialect.H2Dialect\r\nspring.jpa.hibernate.ddl-auto=create\r\n\r\n# Consola de administración de H2\r\nspring.h2.console.enabled=true\r\nspring.h2.console.path=/h2-console\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/producto-mscv/src/main/resources/application.properties b/DelishGo/producto-mscv/src/main/resources/application.properties
+--- a/DelishGo/producto-mscv/src/main/resources/application.properties	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/producto-mscv/src/main/resources/application.properties	(date 1782978165173)
+@@ -1,16 +1,14 @@
+ spring.application.name=producto-mscv
+-
+-server.port=8082
+-spring.datasource.url=jdbc:h2:file:./data/productos
+-spring.datasource.driver-class-name=org.h2.Driver
++server.port=8084
+ 
+-spring.datasource.username=sa
+-spring.datasource.password=sa
++# URL corregida para IntelliJ local (apunta a tu máquina en el puerto expuesto por Docker)
++spring.datasource.url=jdbc:postgresql://host.docker.internal:5432/productos_db
++spring.datasource.username=postgres
++spring.datasource.password=Jesusestlatjrs92
+ 
+-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+-spring.jpa.hibernate.ddl-auto=create
++spring.datasource.driver-class-name=org.postgresql.Driver
+ 
+-# Consola de administración de H2
+-spring.h2.console.enabled=true
+-spring.h2.console.path=/h2-console
+-
++# Configuración de Hibernate/JPA para Postgres
++spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
++spring.jpa.hibernate.ddl-auto=update
++spring.jpa.show-sql=true
+\ No newline at end of file
+Index: DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/client/RestaurantClient.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.delishGo_MSCVs.pedido_mscv.client;\r\n\r\nimport com.delishGo_MSCVs.pedido_mscv.models.dtos.RestaurantDTO;\r\nimport org.springframework.cloud.openfeign.FeignClient;\r\nimport org.springframework.web.bind.annotation.GetMapping;\r\nimport org.springframework.web.bind.annotation.PathVariable;\r\n\r\n@FeignClient(name = \"restaurant-mscv\", url=\"localhost:8080/api/v1/restaurants\")\r\npublic interface RestaurantClient {\r\n    @GetMapping(\"/{id}\")\r\n    RestaurantDTO getRestaurantById(@PathVariable Long id);\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/client/RestaurantClient.java b/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/client/RestaurantClient.java
+--- a/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/client/RestaurantClient.java	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/client/RestaurantClient.java	(date 1782777366742)
+@@ -5,7 +5,7 @@
+ import org.springframework.web.bind.annotation.GetMapping;
+ import org.springframework.web.bind.annotation.PathVariable;
+ 
+-@FeignClient(name = "restaurant-mscv", url="localhost:8080/api/v1/restaurants")
++@FeignClient(name = "restaurant-mscv", url="localhost:8084/api/v1/restaurantes")
+ public interface RestaurantClient {
+     @GetMapping("/{id}")
+     RestaurantDTO getRestaurantById(@PathVariable Long id);
+Index: DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/controllers/PedidoController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.delishGo_MSCVs.pedido_mscv.controllers;\r\n\r\nimport com.delishGo_MSCVs.pedido_mscv.models.Pedido;\r\nimport com.delishGo_MSCVs.pedido_mscv.models.dtos.PedidoDTO;\r\nimport com.delishGo_MSCVs.pedido_mscv.models.dtos.PedidoResponseDTO;\r\nimport com.delishGo_MSCVs.pedido_mscv.services.PedidoService;\r\nimport jakarta.validation.Valid;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.validation.annotation.Validated;\r\nimport org.springframework.web.bind.annotation.*;\r\n\r\nimport java.util.HashMap;\r\nimport java.util.List;\r\nimport java.util.Map;\r\n\r\n@RestController\r\n@RequestMapping(\"/api/v1/pedidos\")\r\n@Validated\r\npublic class PedidoController {\r\n\r\n    @Autowired\r\n    private PedidoService pedidoService;\r\n\r\n    // Obtener todos los pedidos\r\n    @GetMapping\r\n    public ResponseEntity<List<PedidoResponseDTO>> getAllPedidos() {\r\n        return ResponseEntity.ok(pedidoService.findAll());\r\n    }\r\n\r\n    // Obtener pedido por ID\r\n    @GetMapping(\"/{id}\")\r\n    public ResponseEntity<PedidoResponseDTO> findById(@PathVariable Long id) {\r\n        PedidoResponseDTO response = pedidoService.findById(id);\r\n        return ResponseEntity.ok(response);\r\n    }\r\n\r\n    // Crear pedido\r\n    @PostMapping\r\n    public ResponseEntity<PedidoResponseDTO> save(@Valid @RequestBody PedidoDTO pedidoDTO) {\r\n        PedidoResponseDTO response = pedidoService.save(pedidoDTO);\r\n        return ResponseEntity.status(HttpStatus.CREATED).body(response);\r\n    }\r\n\r\n    // Actualizar pedido\r\n    @PutMapping(\"/{id}\")\r\n    public ResponseEntity<PedidoResponseDTO> updatePedido(@PathVariable Long id,\r\n                                                          @RequestBody PedidoDTO pedidoDTO) {\r\n        PedidoResponseDTO pedidoActualizado = pedidoService.update(id, pedidoDTO);\r\n        return ResponseEntity.ok(pedidoActualizado);\r\n    }\r\n\r\n    // Eliminar pedido\r\n    @DeleteMapping(\"/{id}\")\r\n    public ResponseEntity<Map<String, String>> deletePedido(@PathVariable Long id) {\r\n        pedidoService.deleteById(id);\r\n        Map<String, String> response = new HashMap<>();\r\n        response.put(\"message\", \"Pedido con ID \" + id + \" eliminado correctamente\");\r\n        return ResponseEntity.ok(response);\r\n    }\r\n\r\n    // \uD83D\uDD0E Buscar pedidos por cliente\r\n    @GetMapping(\"/cliente/{idCliente}\")\r\n    public ResponseEntity<List<PedidoResponseDTO>> getByCliente(@PathVariable Long idCliente) {\r\n        return ResponseEntity.ok(pedidoService.findByIdCliente(idCliente));\r\n    }\r\n\r\n    // \uD83D\uDD0E Buscar pedidos por restaurante\r\n    @GetMapping(\"/restaurante/{idRestaurant}\")\r\n    public ResponseEntity<List<PedidoResponseDTO>> getByRestaurante(@PathVariable Long idRestaurant) {\r\n        return ResponseEntity.ok(pedidoService.findByIdRestaurant(idRestaurant));\r\n    }\r\n\r\n    // \uD83D\uDD0E Buscar pedidos por estado\r\n    @GetMapping(\"/estado/{estado}\")\r\n    public ResponseEntity<List<PedidoResponseDTO>> getByEstado(@PathVariable String estado) {\r\n        return ResponseEntity.ok(pedidoService.findByEstado(estado));\r\n    }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/controllers/PedidoController.java b/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/controllers/PedidoController.java
+--- a/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/controllers/PedidoController.java	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/controllers/PedidoController.java	(date 1782794579503)
+@@ -18,6 +18,7 @@
+ @RestController
+ @RequestMapping("/api/v1/pedidos")
+ @Validated
++@CrossOrigin(origins = "*") // 🔥 PERMITE QUE TU FRONTEND EN DIRECTO CONECTE SIN BLOQUEOS
+ public class PedidoController {
+ 
+     @Autowired
+@@ -77,6 +78,4 @@
+     public ResponseEntity<List<PedidoResponseDTO>> getByEstado(@PathVariable String estado) {
+         return ResponseEntity.ok(pedidoService.findByEstado(estado));
+     }
+-
+-
+-}
++}
+\ No newline at end of file
+Index: DelishGo/producto-mscv/src/main/java/com/delishgo/producto_mscv/controller/ProductoController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.delishgo.producto_mscv.controller;\r\n\r\nimport com.delishgo.producto_mscv.models.Producto;\r\nimport com.delishgo.producto_mscv.models.dtos.ProductoDTO;\r\nimport com.delishgo.producto_mscv.services.ProductoService;\r\nimport jakarta.validation.Valid;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.web.bind.annotation.*;\r\n\r\nimport java.util.List;\r\nimport java.util.Optional;\r\n\r\n@RestController\r\n@RequestMapping(\"/api/v1/productos\")\r\npublic class ProductoController {\r\n\r\n    @Autowired\r\n    private ProductoService productoService;\r\n\r\n    // Obtener todos los productos\r\n    @GetMapping\r\n    public ResponseEntity<List<ProductoDTO>> getAllProductos() {\r\n        return ResponseEntity.ok(productoService.findAll());\r\n    }\r\n\r\n    // Obtener producto por ID\r\n    @GetMapping(\"/{id}\")\r\n    public ResponseEntity<Producto> getProducto(@PathVariable Long id) {\r\n        return ResponseEntity.ok(productoService.findById(id));\r\n    }\r\n\r\n    // Crear producto\r\n    @PostMapping\r\n    public ResponseEntity<Producto> saveProducto(@RequestBody Producto producto) {\r\n        Producto saved = productoService.save(producto);\r\n        return ResponseEntity.status(HttpStatus.CREATED).body(saved);\r\n    }\r\n\r\n    // Actualizar producto por ID\r\n    @PutMapping(\"/{id}\")\r\n    public ResponseEntity<Producto> updateProducto(@Valid @RequestBody Producto producto, @PathVariable Long id) {\r\n        return ResponseEntity\r\n                .status(HttpStatus.OK)\r\n                .body(productoService.updateById(producto, id));\r\n    }\r\n\r\n    // Eliminar producto por ID\r\n    @DeleteMapping(\"/{id}\")\r\n    public ResponseEntity<Void> deleteProducto(@PathVariable Long id) {\r\n        productoService.deleteById(id);\r\n        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();\r\n    }\r\n\r\n    // Buscar por nombre\r\n    @GetMapping(\"/nombre/{nombre}\")\r\n    public ResponseEntity<Optional<Producto>> getByNombre(@PathVariable String nombre) {\r\n        return ResponseEntity.ok(productoService.findByNombre(nombre));\r\n    }\r\n\r\n    // Buscar por categoría\r\n    @GetMapping(\"/categoria/{categoria}\")\r\n    public ResponseEntity<List<Producto>> getByCategoria(@PathVariable String categoria) {\r\n        return ResponseEntity.ok(productoService.findByCategoria(categoria));\r\n    }\r\n\r\n    // Buscar por disponibilidad\r\n    @GetMapping(\"/disponible/{disponible}\")\r\n    public ResponseEntity<List<Producto>> getByDisponible(@PathVariable Boolean disponible) {\r\n        return ResponseEntity.ok(productoService.findByDisponible(disponible));\r\n    }\r\n\r\n    // \uD83D\uDD17 Nuevo: buscar productos por restaurante\r\n    @GetMapping(\"/restaurante/{idRestaurante}\")\r\n    public ResponseEntity<List<Producto>> getByIdRestaurante(@PathVariable Long idRestaurante) {\r\n        return ResponseEntity.ok(productoService.findByIdRestaurante(idRestaurante));\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/producto-mscv/src/main/java/com/delishgo/producto_mscv/controller/ProductoController.java b/DelishGo/producto-mscv/src/main/java/com/delishgo/producto_mscv/controller/ProductoController.java
+--- a/DelishGo/producto-mscv/src/main/java/com/delishgo/producto_mscv/controller/ProductoController.java	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/producto-mscv/src/main/java/com/delishgo/producto_mscv/controller/ProductoController.java	(date 1782971309565)
+@@ -14,6 +14,7 @@
+ 
+ @RestController
+ @RequestMapping("/api/v1/productos")
++@CrossOrigin(origins = "*")
+ public class ProductoController {
+ 
+     @Autowired
+Index: DelishGo/pedido-mscv/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n\txsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n\t<modelVersion>4.0.0</modelVersion>\r\n\t<parent>\r\n\t\t<groupId>org.food</groupId>\r\n\t\t<artifactId>DelishGo</artifactId>\r\n\t\t<version>1.0-SNAPSHOT</version> <!-- lookup parent from repository -->\r\n\t</parent>\r\n\t<groupId>com.delishGo-MSCVs</groupId>\r\n\t<artifactId>pedido-mscv</artifactId>\r\n\t<version>0.0.1-SNAPSHOT</version>\r\n\t<name/>\r\n\t<description/>\r\n\t<url/>\r\n\t<licenses>\r\n\t\t<license/>\r\n\t</licenses>\r\n\t<developers>\r\n\t\t<developer/>\r\n\t</developers>\r\n\t<scm>\r\n\t\t<connection/>\r\n\t\t<developerConnection/>\r\n\t\t<tag/>\r\n\t\t<url/>\r\n\t</scm>\r\n\t<properties>\r\n\t\t<java.version>21</java.version>\r\n\t\t<spring-cloud.version>2025.1.1</spring-cloud.version>\r\n\t</properties>\r\n\t<dependencies>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-h2console</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t<artifactId>spring-cloud-starter-openfeign</artifactId>\r\n\t\t</dependency>\r\n\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-devtools</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.h2database</groupId>\r\n\t\t\t<artifactId>h2</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.mysql</groupId>\r\n\t\t\t<artifactId>mysql-connector-j</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n        <dependency>\r\n            <groupId>com.delishGo-MSCVs</groupId>\r\n            <artifactId>cliente-mscv</artifactId>\r\n            <version>0.0.1-SNAPSHOT</version>\r\n            <scope>compile</scope>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>com.delishGo-MSCVs</groupId>\r\n            <artifactId>restaurante-mscv</artifactId>\r\n            <version>0.0.1-SNAPSHOT</version>\r\n            <scope>compile</scope>\r\n        </dependency>\r\n    </dependencies>\r\n\t<dependencyManagement>\r\n\t\t<dependencies>\r\n\t\t\t<dependency>\r\n\t\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t\t<artifactId>spring-cloud-dependencies</artifactId>\r\n\t\t\t\t<version>${spring-cloud.version}</version>\r\n\t\t\t\t<type>pom</type>\r\n\t\t\t\t<scope>import</scope>\r\n\t\t\t</dependency>\r\n\t\t</dependencies>\r\n\t</dependencyManagement>\r\n\r\n\t<build>\r\n\t\t<plugins>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t\t<artifactId>spring-boot-maven-plugin</artifactId>\r\n\t\t\t\t<configuration>\r\n\t\t\t\t\t<excludes>\r\n\t\t\t\t\t\t<exclude>\r\n\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t</exclude>\r\n\t\t\t\t\t</excludes>\r\n\t\t\t\t</configuration>\r\n\t\t\t</plugin>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.apache.maven.plugins</groupId>\r\n\t\t\t\t<artifactId>maven-compiler-plugin</artifactId>\r\n\t\t\t\t<executions>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-compile</id>\r\n\t\t\t\t\t\t<phase>compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>compile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-testCompile</id>\r\n\t\t\t\t\t\t<phase>test-compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>testCompile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t</executions>\r\n\t\t\t</plugin>\r\n\t\t</plugins>\r\n\t</build>\r\n\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/pedido-mscv/pom.xml b/DelishGo/pedido-mscv/pom.xml
+--- a/DelishGo/pedido-mscv/pom.xml	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/pedido-mscv/pom.xml	(date 1782772248342)
+@@ -1,41 +1,24 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 	<modelVersion>4.0.0</modelVersion>
+ 	<parent>
+ 		<groupId>org.food</groupId>
+ 		<artifactId>DelishGo</artifactId>
+-		<version>1.0-SNAPSHOT</version> <!-- lookup parent from repository -->
++		<version>1.0-SNAPSHOT</version>
+ 	</parent>
+ 	<groupId>com.delishGo-MSCVs</groupId>
+ 	<artifactId>pedido-mscv</artifactId>
+ 	<version>0.0.1-SNAPSHOT</version>
+-	<name/>
+-	<description/>
+-	<url/>
+-	<licenses>
+-		<license/>
+-	</licenses>
+-	<developers>
+-		<developer/>
+-	</developers>
+-	<scm>
+-		<connection/>
+-		<developerConnection/>
+-		<tag/>
+-		<url/>
+-	</scm>
++
+ 	<properties>
+ 		<java.version>21</java.version>
+ 		<spring-cloud.version>2025.1.1</spring-cloud.version>
+ 	</properties>
++
+ 	<dependencies>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-h2console</artifactId>
+-		</dependency>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+ 		</dependency>
+ 		<dependency>
+@@ -67,11 +50,31 @@
+ 			<artifactId>mysql-connector-j</artifactId>
+ 			<scope>runtime</scope>
+ 		</dependency>
++		<dependency>
++			<groupId>org.postgresql</groupId>
++			<artifactId>postgresql</artifactId>
++			<scope>runtime</scope>
++		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.projectlombok</groupId>
+ 			<artifactId>lombok</artifactId>
+ 			<optional>true</optional>
+ 		</dependency>
++
++		<dependency>
++			<groupId>com.delishGo-MSCVs</groupId>
++			<artifactId>cliente-mscv</artifactId>
++			<version>0.0.1-SNAPSHOT</version>
++			<scope>compile</scope>
++		</dependency>
++		<dependency>
++			<groupId>com.delishGo-MSCVs</groupId>
++			<artifactId>restaurante-mscv</artifactId>
++			<version>0.0.1-SNAPSHOT</version>
++			<scope>compile</scope>
++		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+@@ -87,19 +90,8 @@
+ 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+ 			<scope>test</scope>
+ 		</dependency>
+-        <dependency>
+-            <groupId>com.delishGo-MSCVs</groupId>
+-            <artifactId>cliente-mscv</artifactId>
+-            <version>0.0.1-SNAPSHOT</version>
+-            <scope>compile</scope>
+-        </dependency>
+-        <dependency>
+-            <groupId>com.delishGo-MSCVs</groupId>
+-            <artifactId>restaurante-mscv</artifactId>
+-            <version>0.0.1-SNAPSHOT</version>
+-            <scope>compile</scope>
+-        </dependency>
+-    </dependencies>
++	</dependencies>
++
+ 	<dependencyManagement>
+ 		<dependencies>
+ 			<dependency>
+@@ -129,40 +121,15 @@
+ 			<plugin>
+ 				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-compiler-plugin</artifactId>
+-				<executions>
+-					<execution>
+-						<id>default-compile</id>
+-						<phase>compile</phase>
+-						<goals>
+-							<goal>compile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-					<execution>
+-						<id>default-testCompile</id>
+-						<phase>test-compile</phase>
+-						<goals>
+-							<goal>testCompile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-				</executions>
++				<configuration>
++					<annotationProcessorPaths>
++						<path>
++							<groupId>org.projectlombok</groupId>
++							<artifactId>lombok</artifactId>
++						</path>
++					</annotationProcessorPaths>
++				</configuration>
+ 			</plugin>
+ 		</plugins>
+ 	</build>
+-
+-</project>
++</project>
+\ No newline at end of file
+Index: DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/services/PedidoServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.delishGo_MSCVs.pedido_mscv.services;\r\n\r\nimport com.delishGo_MSCVs.cliente_mscv.exception.ClienteException;\r\nimport com.delishGo_MSCVs.pedido_mscv.client.ClienteClient;\r\nimport com.delishGo_MSCVs.pedido_mscv.client.DetallePedidoClient;\r\nimport com.delishGo_MSCVs.pedido_mscv.client.ProductoClient;\r\nimport com.delishGo_MSCVs.pedido_mscv.client.RestaurantClient;\r\nimport com.delishGo_MSCVs.pedido_mscv.exception.PedidoException;\r\nimport com.delishGo_MSCVs.pedido_mscv.models.Pedido;\r\nimport com.delishGo_MSCVs.pedido_mscv.models.dtos.*;\r\nimport com.delishGo_MSCVs.pedido_mscv.repositories.PedidoRepository;\r\nimport com.delishGo_MSCVs.restaurante_mscv.exception.RestaurantException;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.stereotype.Service;\r\n\r\nimport java.time.LocalDateTime;\r\nimport java.util.Collections;\r\nimport java.util.List;\r\nimport java.util.stream.Collectors;\r\n\r\n@Service\r\npublic class PedidoServiceImpl implements PedidoService {\r\n\r\n    @Autowired\r\n    private PedidoRepository pedidoRepository;\r\n\r\n    @Autowired\r\n    private ClienteClient clienteClient;\r\n\r\n    @Autowired\r\n    private RestaurantClient restaurantClient;\r\n\r\n    @Autowired\r\n    private ProductoClient productoClient;\r\n\r\n    @Override\r\n    public List<PedidoResponseDTO> findAll() {\r\n        return pedidoRepository.findAll().stream()\r\n                .map(this::mapToResponse)\r\n                .collect(Collectors.toList());\r\n    }\r\n\r\n    @Override\r\n    public PedidoResponseDTO findById(Long id) {\r\n        Pedido pedido = pedidoRepository.findById(id)\r\n                .orElseThrow(() -> new PedidoException(\"Pedido con ID:\" + id + \" no encontrado\"));\r\n        return mapToResponse(pedido);\r\n    }\r\n\r\n    @Override\r\n    public PedidoResponseDTO save(PedidoDTO pedidoDTO) {\r\n        // Validar cliente\r\n        ClienteDTO clienteDTO = clienteClient.getClienteById(pedidoDTO.getIdCliente());\r\n        if (clienteDTO == null) {\r\n            throw new ClienteException(\"Cliente no encontrado con ID: \" + pedidoDTO.getIdCliente());\r\n        }\r\n\r\n        // Validar restaurante\r\n        RestaurantDTO restaurantDTO = restaurantClient.getRestaurantById(pedidoDTO.getIdRestaurant());\r\n        if (restaurantDTO == null) {\r\n            throw new RestaurantException(\"Restaurante no encontrado con ID: \" + pedidoDTO.getIdRestaurant());\r\n        }\r\n\r\n        // Validar detalles\r\n        if (pedidoDTO.getDetallesPedido() == null || pedidoDTO.getDetallesPedido().isEmpty()) {\r\n            throw new PedidoException(\"El pedido debe tener al menos un detalle\");\r\n        }\r\n\r\n        // Validar productos y asignar precio unitario\r\n        pedidoDTO.getDetallesPedido().forEach(detalle -> {\r\n            ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());\r\n            if (producto == null) {\r\n                throw new PedidoException(\"Producto no encontrado con ID: \" + detalle.getIdProducto());\r\n            }\r\n            detalle.setPrecioUnitario(producto.getPrecio());\r\n        });\r\n\r\n        // Calcular monto total\r\n        double total = pedidoDTO.getDetallesPedido().stream()\r\n                .mapToDouble(DetallePedidoDTO::getSubtotal)\r\n                .sum();\r\n\r\n        // Guardar pedido\r\n        Pedido pedido = new Pedido();\r\n        pedido.setIdCliente(clienteDTO.getIdCliente());\r\n        pedido.setIdRestaurant(restaurantDTO.getIdRestaurant());\r\n        pedido.setMontoTotal(total);\r\n        pedido.setEstado(pedidoDTO.getEstado());\r\n        pedido.setHoraPedido(LocalDateTime.now());\r\n\r\n        Pedido savedPedido = pedidoRepository.save(pedido);\r\n\r\n        // Respuesta (solo devuelve lo que vino en el DTO)\r\n        PedidoResponseDTO response = mapToResponse(savedPedido);\r\n        response.setDetallesPedido(pedidoDTO.getDetallesPedido());\r\n        response.setMontoTotal(total);\r\n        return response;\r\n    }\r\n\r\n    @Override\r\n    public PedidoResponseDTO update(Long id, PedidoDTO pedidoDTO) {\r\n        Pedido pedido = pedidoRepository.findById(id)\r\n                .orElseThrow(() -> new PedidoException(\"Pedido con ID:\" + id + \" no encontrado\"));\r\n\r\n        // Actualizar estado\r\n        pedido.setEstado(pedidoDTO.getEstado());\r\n\r\n        // Validar productos y recalcular\r\n        pedidoDTO.getDetallesPedido().forEach(detalle -> {\r\n            ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());\r\n            if (producto == null) {\r\n                throw new PedidoException(\"Producto no encontrado con ID: \" + detalle.getIdProducto());\r\n            }\r\n            detalle.setPrecioUnitario(producto.getPrecio());\r\n        });\r\n\r\n        double total = pedidoDTO.getDetallesPedido().stream()\r\n                .mapToDouble(DetallePedidoDTO::getSubtotal)\r\n                .sum();\r\n\r\n        pedido.setMontoTotal(total);\r\n        pedido.setHoraPedido(LocalDateTime.now());\r\n        Pedido updatedPedido = pedidoRepository.save(pedido);\r\n\r\n        PedidoResponseDTO response = mapToResponse(updatedPedido);\r\n        response.setDetallesPedido(pedidoDTO.getDetallesPedido());\r\n        response.setMontoTotal(total);\r\n        return response;\r\n    }\r\n\r\n    @Override\r\n    public void deleteById(Long id) {\r\n        if (!pedidoRepository.existsById(id)) {\r\n            throw new PedidoException(\"Pedido con ID:\" + id + \" no encontrado\");\r\n        }\r\n        pedidoRepository.deleteById(id);\r\n    }\r\n\r\n    @Override\r\n    public List<PedidoResponseDTO> findByIdCliente(Long idCliente) {\r\n        return pedidoRepository.findByIdCliente(idCliente).stream()\r\n                .map(this::mapToResponse)\r\n                .collect(Collectors.toList());\r\n    }\r\n\r\n    @Override\r\n    public List<PedidoResponseDTO> findByIdRestaurant(Long idRestaurant) {\r\n        return pedidoRepository.findByIdRestaurant(idRestaurant).stream()\r\n                .map(this::mapToResponse)\r\n                .collect(Collectors.toList());\r\n    }\r\n\r\n    @Override\r\n    public List<PedidoResponseDTO> findByEstado(String estado) {\r\n        return pedidoRepository.findByEstado(estado).stream()\r\n                .map(this::mapToResponse)\r\n                .collect(Collectors.toList());\r\n    }\r\n\r\n    // \uD83D\uDD27 Método privado para mapear entidad → DTO\r\n    private PedidoResponseDTO mapToResponse(Pedido pedido) {\r\n        PedidoResponseDTO response = new PedidoResponseDTO();\r\n        response.setIdPedido(pedido.getIdPedido());\r\n        response.setEstado(pedido.getEstado());\r\n        response.setHoraPedido(pedido.getHoraPedido());\r\n        response.setIdCliente(pedido.getIdCliente());\r\n        response.setIdRestaurant(pedido.getIdRestaurant());\r\n        response.setMontoTotal(pedido.getMontoTotal());\r\n\r\n        // ⚠\uFE0F Antes solo devolvías los detalles del DTO, no llamabas al microservicio\r\n        response.setDetallesPedido(Collections.emptyList());\r\n\r\n        return response;\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/services/PedidoServiceImpl.java b/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/services/PedidoServiceImpl.java
+--- a/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/services/PedidoServiceImpl.java	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/pedido-mscv/src/main/java/com/delishGo_MSCVs/pedido_mscv/services/PedidoServiceImpl.java	(date 1782778083269)
+@@ -1,6 +1,5 @@
+ package com.delishGo_MSCVs.pedido_mscv.services;
+ 
+-import com.delishGo_MSCVs.cliente_mscv.exception.ClienteException;
+ import com.delishGo_MSCVs.pedido_mscv.client.ClienteClient;
+ import com.delishGo_MSCVs.pedido_mscv.client.DetallePedidoClient;
+ import com.delishGo_MSCVs.pedido_mscv.client.ProductoClient;
+@@ -9,7 +8,6 @@
+ import com.delishGo_MSCVs.pedido_mscv.models.Pedido;
+ import com.delishGo_MSCVs.pedido_mscv.models.dtos.*;
+ import com.delishGo_MSCVs.pedido_mscv.repositories.PedidoRepository;
+-import com.delishGo_MSCVs.restaurante_mscv.exception.RestaurantException;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.stereotype.Service;
+ 
+@@ -47,40 +45,48 @@
+         return mapToResponse(pedido);
+     }
+ 
++
++
+     @Override
+     public PedidoResponseDTO save(PedidoDTO pedidoDTO) {
+-        // Validar cliente
++        // 1. Validar cliente
+         ClienteDTO clienteDTO = clienteClient.getClienteById(pedidoDTO.getIdCliente());
+         if (clienteDTO == null) {
+-            throw new ClienteException("Cliente no encontrado con ID: " + pedidoDTO.getIdCliente());
++            throw new PedidoException("Cliente no encontrado con ID: " + pedidoDTO.getIdCliente());
+         }
+ 
+-        // Validar restaurante
++        // 2. Validar restaurante
+         RestaurantDTO restaurantDTO = restaurantClient.getRestaurantById(pedidoDTO.getIdRestaurant());
+         if (restaurantDTO == null) {
+-            throw new RestaurantException("Restaurante no encontrado con ID: " + pedidoDTO.getIdRestaurant());
++            throw new PedidoException("Restaurante no encontrado con ID: " + pedidoDTO.getIdRestaurant());
+         }
+ 
+-        // Validar detalles
++        // 3. Validar que existan detalles
+         if (pedidoDTO.getDetallesPedido() == null || pedidoDTO.getDetallesPedido().isEmpty()) {
+             throw new PedidoException("El pedido debe tener al menos un detalle");
+         }
+ 
+-        // Validar productos y asignar precio unitario
++        // 4. Validar productos, asignar precio y CALCULAR SUBTOTAL automáticamente
+         pedidoDTO.getDetallesPedido().forEach(detalle -> {
+             ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
+             if (producto == null) {
+                 throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
+             }
++
++            // Seteamos el precio unitario real desde el microservicio de productos
+             detalle.setPrecioUnitario(producto.getPrecio());
++
++            // 🚀 CÁLCULO AUTOMÁTICO DEL SUBTOTAL: cantidad * precioUnitario
++            double subtotalCalculado = detalle.getCantidad() * producto.getPrecio();
++            detalle.setSubtotal(subtotalCalculado);
+         });
+ 
+-        // Calcular monto total
++        // 5. Calcular monto total sumando los subtotales recién calculados
+         double total = pedidoDTO.getDetallesPedido().stream()
+                 .mapToDouble(DetallePedidoDTO::getSubtotal)
+                 .sum();
+ 
+-        // Guardar pedido
++        // 6. Guardar pedido padre en PostgreSQL
+         Pedido pedido = new Pedido();
+         pedido.setIdCliente(clienteDTO.getIdCliente());
+         pedido.setIdRestaurant(restaurantDTO.getIdRestaurant());
+@@ -90,13 +96,26 @@
+ 
+         Pedido savedPedido = pedidoRepository.save(pedido);
+ 
+-        // Respuesta (solo devuelve lo que vino en el DTO)
++        // 7. Llenar de forma dinámica idPedido, idDetalle y observaciones
++        long contadorId = 1;
++        for (DetallePedidoDTO detalle : pedidoDTO.getDetallesPedido()) {
++            detalle.setIdPedido(savedPedido.getIdPedido());
++            detalle.setIdDetalle(contadorId++);
++
++            if (detalle.getObservacion() == null) {
++                detalle.setObservacion("Sin observaciones");
++            }
++        }
++
++        // 8. Construir respuesta final
+         PedidoResponseDTO response = mapToResponse(savedPedido);
+         response.setDetallesPedido(pedidoDTO.getDetallesPedido());
+         response.setMontoTotal(total);
+         return response;
+     }
+ 
++
++
+     @Override
+     public PedidoResponseDTO update(Long id, PedidoDTO pedidoDTO) {
+         Pedido pedido = pedidoRepository.findById(id)
+@@ -162,12 +181,14 @@
+         PedidoResponseDTO response = new PedidoResponseDTO();
+         response.setIdPedido(pedido.getIdPedido());
+         response.setEstado(pedido.getEstado());
++
++        // 🚀 Asegúrate de que esta línea esté exactamente así:
+         response.setHoraPedido(pedido.getHoraPedido());
++
+         response.setIdCliente(pedido.getIdCliente());
+         response.setIdRestaurant(pedido.getIdRestaurant());
+         response.setMontoTotal(pedido.getMontoTotal());
+ 
+-        // ⚠️ Antes solo devolvías los detalles del DTO, no llamabas al microservicio
+         response.setDetallesPedido(Collections.emptyList());
+ 
+         return response;
+Index: DelishGo/restaurante-mscv/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n\txsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n\t<modelVersion>4.0.0</modelVersion>\r\n\t<parent>\r\n\t\t<groupId>org.food</groupId>\r\n\t\t<artifactId>DelishGo</artifactId>\r\n\t\t<version>1.0-SNAPSHOT</version><!-- lookup parent from repository -->\r\n\t</parent>\r\n\t<groupId>com.delishGo-MSCVs</groupId>\r\n\t<artifactId>restaurante-mscv</artifactId>\r\n\t<version>0.0.1-SNAPSHOT</version>\r\n\t<name/>\r\n\t<description/>\r\n\t<url/>\r\n\t<licenses>\r\n\t\t<license/>\r\n\t</licenses>\r\n\t<developers>\r\n\t\t<developer/>\r\n\t</developers>\r\n\t<scm>\r\n\t\t<connection/>\r\n\t\t<developerConnection/>\r\n\t\t<tag/>\r\n\t\t<url/>\r\n\t</scm>\r\n\t<properties>\r\n\t\t<java.version>21</java.version>\r\n\t\t<spring-cloud.version>2025.1.1</spring-cloud.version>\r\n\t</properties>\r\n\t<dependencies>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-h2console</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t<artifactId>spring-cloud-starter-openfeign</artifactId>\r\n\t\t</dependency>\r\n\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-devtools</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.h2database</groupId>\r\n\t\t\t<artifactId>h2</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.mysql</groupId>\r\n\t\t\t<artifactId>mysql-connector-j</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t</dependencies>\r\n\t<dependencyManagement>\r\n\t\t<dependencies>\r\n\t\t\t<dependency>\r\n\t\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t\t<artifactId>spring-cloud-dependencies</artifactId>\r\n\t\t\t\t<version>${spring-cloud.version}</version>\r\n\t\t\t\t<type>pom</type>\r\n\t\t\t\t<scope>import</scope>\r\n\t\t\t</dependency>\r\n\t\t</dependencies>\r\n\t</dependencyManagement>\r\n\r\n\t<build>\r\n\t\t<plugins>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t\t<artifactId>spring-boot-maven-plugin</artifactId>\r\n\t\t\t\t<configuration>\r\n\t\t\t\t\t<excludes>\r\n\t\t\t\t\t\t<exclude>\r\n\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t</exclude>\r\n\t\t\t\t\t</excludes>\r\n\t\t\t\t</configuration>\r\n\t\t\t</plugin>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.apache.maven.plugins</groupId>\r\n\t\t\t\t<artifactId>maven-compiler-plugin</artifactId>\r\n\t\t\t\t<executions>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-compile</id>\r\n\t\t\t\t\t\t<phase>compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>compile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-testCompile</id>\r\n\t\t\t\t\t\t<phase>test-compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>testCompile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t</executions>\r\n\t\t\t</plugin>\r\n\t\t</plugins>\r\n\t</build>\r\n\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/restaurante-mscv/pom.xml b/DelishGo/restaurante-mscv/pom.xml
+--- a/DelishGo/restaurante-mscv/pom.xml	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/restaurante-mscv/pom.xml	(date 1782772261405)
+@@ -1,39 +1,25 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0"
++         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 	<modelVersion>4.0.0</modelVersion>
++
+ 	<parent>
+ 		<groupId>org.food</groupId>
+ 		<artifactId>DelishGo</artifactId>
+-		<version>1.0-SNAPSHOT</version><!-- lookup parent from repository -->
++		<version>1.0-SNAPSHOT</version>
+ 	</parent>
++
+ 	<groupId>com.delishGo-MSCVs</groupId>
+ 	<artifactId>restaurante-mscv</artifactId>
+ 	<version>0.0.1-SNAPSHOT</version>
+-	<name/>
+-	<description/>
+-	<url/>
+-	<licenses>
+-		<license/>
+-	</licenses>
+-	<developers>
+-		<developer/>
+-	</developers>
+-	<scm>
+-		<connection/>
+-		<developerConnection/>
+-		<tag/>
+-		<url/>
+-	</scm>
++
+ 	<properties>
+ 		<java.version>21</java.version>
+ 		<spring-cloud.version>2025.1.1</spring-cloud.version>
+ 	</properties>
++
+ 	<dependencies>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-h2console</artifactId>
+-		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+@@ -44,19 +30,13 @@
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-webmvc</artifactId>
++			<artifactId>spring-boot-starter-web</artifactId>
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.cloud</groupId>
+ 			<artifactId>spring-cloud-starter-openfeign</artifactId>
+ 		</dependency>
+ 
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-devtools</artifactId>
+-			<scope>runtime</scope>
+-			<optional>true</optional>
+-		</dependency>
+ 		<dependency>
+ 			<groupId>com.h2database</groupId>
+ 			<artifactId>h2</artifactId>
+@@ -67,27 +47,25 @@
+ 			<artifactId>mysql-connector-j</artifactId>
+ 			<scope>runtime</scope>
+ 		</dependency>
++		<dependency>
++			<groupId>org.postgresql</groupId>
++			<artifactId>postgresql</artifactId>
++			<scope>runtime</scope>
++		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.projectlombok</groupId>
+ 			<artifactId>lombok</artifactId>
+ 			<optional>true</optional>
+ 		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+-			<scope>test</scope>
+-		</dependency>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-validation-test</artifactId>
+-			<scope>test</scope>
+-		</dependency>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-webmvc-test</artifactId>
++			<artifactId>spring-boot-starter-test</artifactId>
+ 			<scope>test</scope>
+ 		</dependency>
+ 	</dependencies>
++
+ 	<dependencyManagement>
+ 		<dependencies>
+ 			<dependency>
+@@ -106,51 +84,22 @@
+ 				<groupId>org.springframework.boot</groupId>
+ 				<artifactId>spring-boot-maven-plugin</artifactId>
+ 				<configuration>
+-					<excludes>
+-						<exclude>
+-							<groupId>org.projectlombok</groupId>
+-							<artifactId>lombok</artifactId>
+-						</exclude>
+-					</excludes>
++					<classifier>exec</classifier>
+ 				</configuration>
+ 			</plugin>
++
+ 			<plugin>
+ 				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-compiler-plugin</artifactId>
+-				<executions>
+-					<execution>
+-						<id>default-compile</id>
+-						<phase>compile</phase>
+-						<goals>
+-							<goal>compile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-					<execution>
+-						<id>default-testCompile</id>
+-						<phase>test-compile</phase>
+-						<goals>
+-							<goal>testCompile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-				</executions>
++				<configuration>
++					<annotationProcessorPaths>
++						<path>
++							<groupId>org.projectlombok</groupId>
++							<artifactId>lombok</artifactId>
++						</path>
++					</annotationProcessorPaths>
++				</configuration>
+ 			</plugin>
+ 		</plugins>
+ 	</build>
+-
+-</project>
++</project>
+\ No newline at end of file
+Index: DelishGo/cliente-mscv/src/main/java/com/delishGo_MSCVs/cliente_mscv/controllers/ClienteController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.delishGo_MSCVs.cliente_mscv.controllers;\r\n\r\nimport com.delishGo_MSCVs.cliente_mscv.models.Cliente;\r\nimport com.delishGo_MSCVs.cliente_mscv.models.dtos.ClienteDTO;\r\nimport com.delishGo_MSCVs.cliente_mscv.services.ClienteService;\r\nimport jakarta.validation.Valid;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.validation.annotation.Validated;\r\nimport org.springframework.web.bind.annotation.*;\r\n\r\nimport java.util.List;\r\n\r\n@RestController\r\n@RequestMapping(\"/api/v1/clientes\")\r\n@Validated\r\npublic class ClienteController {\r\n\r\n    @Autowired\r\n    private ClienteService clienteService;\r\n\r\n    // Obtener todos los clientes\r\n    @GetMapping\r\n    public ResponseEntity<List<ClienteDTO>> findAll() {\r\n        return ResponseEntity.ok(clienteService.findAll());\r\n    }\r\n\r\n    // Obtener cliente por ID\r\n    @GetMapping(\"/{idCliente}\")\r\n    public ResponseEntity<ClienteDTO> findById(@PathVariable Long idCliente) {\r\n        ClienteDTO cliente = clienteService.findByIdCliente(idCliente);\r\n        return ResponseEntity.ok(cliente);\r\n    }\r\n\r\n    // Crear cliente\r\n    @PostMapping\r\n    public ResponseEntity<ClienteDTO> save(@Valid @RequestBody Cliente cliente) {\r\n        ClienteDTO nuevo = clienteService.save(cliente);\r\n        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);\r\n    }\r\n\r\n    // Eliminar cliente\r\n    @DeleteMapping(\"/{idCliente}\")\r\n    public ResponseEntity<String> delete(@PathVariable Long idCliente) {\r\n        clienteService.delete(idCliente);\r\n        return ResponseEntity.ok(\"Cliente con ID: \" + idCliente + \" fue eliminado correctamente\");\r\n    }\r\n\r\n    // Actualizar cliente\r\n    @PutMapping(\"/{idCliente}\")\r\n    public ResponseEntity<ClienteDTO> update(@PathVariable Long idCliente,\r\n                                             @Valid @RequestBody Cliente cliente) {\r\n        ClienteDTO updated = clienteService.updateByIdCliente(idCliente, cliente);\r\n        return ResponseEntity.ok(updated);\r\n    }\r\n\r\n    // \uD83D\uDD0E Listar clientes activos\r\n    @GetMapping(\"/activos\")\r\n    public ResponseEntity<List<ClienteDTO>> findClientesActivos() {\r\n        return ResponseEntity.ok(clienteService.findClientesActivos());\r\n    }\r\n\r\n    // \uD83D\uDD0E Buscar cliente por correo\r\n    @GetMapping(\"/email/{emailCliente}\")\r\n    public ResponseEntity<ClienteDTO> findByEmail(@PathVariable String emailCliente) {\r\n        ClienteDTO cliente = clienteService.findByEmailCliente(emailCliente);\r\n        return ResponseEntity.ok(cliente);\r\n    }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/cliente-mscv/src/main/java/com/delishGo_MSCVs/cliente_mscv/controllers/ClienteController.java b/DelishGo/cliente-mscv/src/main/java/com/delishGo_MSCVs/cliente_mscv/controllers/ClienteController.java
+--- a/DelishGo/cliente-mscv/src/main/java/com/delishGo_MSCVs/cliente_mscv/controllers/ClienteController.java	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/cliente-mscv/src/main/java/com/delishGo_MSCVs/cliente_mscv/controllers/ClienteController.java	(date 1782971309577)
+@@ -14,6 +14,7 @@
+ 
+ @RestController
+ @RequestMapping("/api/v1/clientes")
++@CrossOrigin(origins = "*")
+ @Validated
+ public class ClienteController {
+ 
+Index: DelishGo/restaurante-mscv/src/main/java/com/delishGo_MSCVs/restaurante_mscv/controllers/RestaurantController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.delishGo_MSCVs.restaurante_mscv.controllers;\r\n\r\nimport com.delishGo_MSCVs.restaurante_mscv.models.Restaurant;\r\nimport com.delishGo_MSCVs.restaurante_mscv.services.RestaurantService;\r\nimport jakarta.validation.Valid;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.validation.annotation.Validated;\r\nimport org.springframework.web.bind.annotation.*;\r\n\r\nimport java.util.List;\r\n\r\n@RestController\r\n@RequestMapping(\"/api/v1/restaurants\")\r\n@Validated\r\n\r\npublic class RestaurantController {\r\n    @Autowired\r\n    private RestaurantService restaurantService;\r\n\r\n    @GetMapping\r\n    public ResponseEntity<List<Restaurant>> findAll() {\r\n        return ResponseEntity.status(HttpStatus.OK).body(this.restaurantService.findAll());\r\n    }\r\n\r\n    @GetMapping(\"/{idRestaurant}\")\r\n    public ResponseEntity<Restaurant> findById(@PathVariable Long idRestaurant) {\r\n        return ResponseEntity.status(HttpStatus.OK).body(this.restaurantService.findById(idRestaurant));\r\n    }\r\n\r\n    @PostMapping\r\n    public ResponseEntity<Restaurant> save(@Valid @RequestBody Restaurant restaurant) {\r\n        return ResponseEntity.status(HttpStatus.CREATED).body(this.restaurantService.save(restaurant));\r\n    }\r\n\r\n    @DeleteMapping(\"/{idRestaurant}\")\r\n    public ResponseEntity<Void> delete(@PathVariable Long idRestaurant) {\r\n        restaurantService.delete(idRestaurant);\r\n        return ResponseEntity.noContent().build();\r\n    }\r\n\r\n    @PutMapping(\"/{idRestaurant}\")\r\n    public ResponseEntity<Restaurant> update(@PathVariable Long idRestaurant,\r\n                                             @Valid @RequestBody Restaurant restaurant) {\r\n        Restaurant updated = restaurantService.update(idRestaurant, restaurant);\r\n        return ResponseEntity.ok(updated);\r\n    }\r\n\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/restaurante-mscv/src/main/java/com/delishGo_MSCVs/restaurante_mscv/controllers/RestaurantController.java b/DelishGo/restaurante-mscv/src/main/java/com/delishGo_MSCVs/restaurante_mscv/controllers/RestaurantController.java
+--- a/DelishGo/restaurante-mscv/src/main/java/com/delishGo_MSCVs/restaurante_mscv/controllers/RestaurantController.java	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/restaurante-mscv/src/main/java/com/delishGo_MSCVs/restaurante_mscv/controllers/RestaurantController.java	(date 1782971309554)
+@@ -12,7 +12,8 @@
+ import java.util.List;
+ 
+ @RestController
+-@RequestMapping("/api/v1/restaurants")
++@RequestMapping("/api/v1/restaurantes")
++@CrossOrigin(origins = "*")
+ @Validated
+ 
+ public class RestaurantController {
+Index: DelishGo/cliente-mscv/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n\txsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n\t<modelVersion>4.0.0</modelVersion>\r\n\t<parent>\r\n\t\t<groupId>org.food</groupId>\r\n\t\t<artifactId>DelishGo</artifactId>\r\n\t\t<version>1.0-SNAPSHOT</version> <!-- lookup parent from repository -->\r\n\t</parent>\r\n\t<groupId>com.delishGo-MSCVs</groupId>\r\n\t<artifactId>cliente-mscv</artifactId>\r\n\t<version>0.0.1-SNAPSHOT</version>\r\n\t<name/>\r\n\t<description/>\r\n\t<url/>\r\n\t<licenses>\r\n\t\t<license/>\r\n\t</licenses>\r\n\t<developers>\r\n\t\t<developer/>\r\n\t</developers>\r\n\t<scm>\r\n\t\t<connection/>\r\n\t\t<developerConnection/>\r\n\t\t<tag/>\r\n\t\t<url/>\r\n\t</scm>\r\n\t<properties>\r\n\t\t<java.version>21</java.version>\r\n\t\t<spring-cloud.version>2025.1.1</spring-cloud.version>\r\n\t</properties>\r\n\t<dependencies>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-h2console</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t<artifactId>spring-cloud-starter-openfeign</artifactId>\r\n\t\t</dependency>\r\n\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-devtools</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.h2database</groupId>\r\n\t\t\t<artifactId>h2</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.mysql</groupId>\r\n\t\t\t<artifactId>mysql-connector-j</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t</dependencies>\r\n\t<dependencyManagement>\r\n\t\t<dependencies>\r\n\t\t\t<dependency>\r\n\t\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t\t<artifactId>spring-cloud-dependencies</artifactId>\r\n\t\t\t\t<version>${spring-cloud.version}</version>\r\n\t\t\t\t<type>pom</type>\r\n\t\t\t\t<scope>import</scope>\r\n\t\t\t</dependency>\r\n\t\t</dependencies>\r\n\t</dependencyManagement>\r\n\r\n\t<build>\r\n\t\t<plugins>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t\t<artifactId>spring-boot-maven-plugin</artifactId>\r\n\t\t\t\t<configuration>\r\n\t\t\t\t\t<excludes>\r\n\t\t\t\t\t\t<exclude>\r\n\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t</exclude>\r\n\t\t\t\t\t</excludes>\r\n\t\t\t\t</configuration>\r\n\t\t\t</plugin>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.apache.maven.plugins</groupId>\r\n\t\t\t\t<artifactId>maven-compiler-plugin</artifactId>\r\n\t\t\t\t<executions>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-compile</id>\r\n\t\t\t\t\t\t<phase>compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>compile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-testCompile</id>\r\n\t\t\t\t\t\t<phase>test-compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>testCompile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t</executions>\r\n\t\t\t</plugin>\r\n\t\t</plugins>\r\n\t</build>\r\n\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/cliente-mscv/pom.xml b/DelishGo/cliente-mscv/pom.xml
+--- a/DelishGo/cliente-mscv/pom.xml	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/cliente-mscv/pom.xml	(date 1782771528330)
+@@ -1,39 +1,24 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0"
++         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 	<modelVersion>4.0.0</modelVersion>
++
+ 	<parent>
+ 		<groupId>org.food</groupId>
+ 		<artifactId>DelishGo</artifactId>
+-		<version>1.0-SNAPSHOT</version> <!-- lookup parent from repository -->
++		<version>1.0-SNAPSHOT</version>
+ 	</parent>
++
+ 	<groupId>com.delishGo-MSCVs</groupId>
+ 	<artifactId>cliente-mscv</artifactId>
+ 	<version>0.0.1-SNAPSHOT</version>
+-	<name/>
+-	<description/>
+-	<url/>
+-	<licenses>
+-		<license/>
+-	</licenses>
+-	<developers>
+-		<developer/>
+-	</developers>
+-	<scm>
+-		<connection/>
+-		<developerConnection/>
+-		<tag/>
+-		<url/>
+-	</scm>
++
+ 	<properties>
+ 		<java.version>21</java.version>
+ 		<spring-cloud.version>2025.1.1</spring-cloud.version>
+ 	</properties>
++
+ 	<dependencies>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-h2console</artifactId>
+-		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+@@ -44,19 +29,13 @@
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-webmvc</artifactId>
++			<artifactId>spring-boot-starter-web</artifactId>
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.cloud</groupId>
+ 			<artifactId>spring-cloud-starter-openfeign</artifactId>
+ 		</dependency>
+ 
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-devtools</artifactId>
+-			<scope>runtime</scope>
+-			<optional>true</optional>
+-		</dependency>
+ 		<dependency>
+ 			<groupId>com.h2database</groupId>
+ 			<artifactId>h2</artifactId>
+@@ -67,27 +46,25 @@
+ 			<artifactId>mysql-connector-j</artifactId>
+ 			<scope>runtime</scope>
+ 		</dependency>
++		<dependency>
++			<groupId>org.postgresql</groupId>
++			<artifactId>postgresql</artifactId>
++			<scope>runtime</scope>
++		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.projectlombok</groupId>
+ 			<artifactId>lombok</artifactId>
+ 			<optional>true</optional>
+ 		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+-			<scope>test</scope>
+-		</dependency>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-validation-test</artifactId>
+-			<scope>test</scope>
+-		</dependency>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-starter-webmvc-test</artifactId>
++			<artifactId>spring-boot-starter-test</artifactId>
+ 			<scope>test</scope>
+ 		</dependency>
+ 	</dependencies>
++
+ 	<dependencyManagement>
+ 		<dependencies>
+ 			<dependency>
+@@ -106,51 +83,22 @@
+ 				<groupId>org.springframework.boot</groupId>
+ 				<artifactId>spring-boot-maven-plugin</artifactId>
+ 				<configuration>
+-					<excludes>
+-						<exclude>
+-							<groupId>org.projectlombok</groupId>
+-							<artifactId>lombok</artifactId>
+-						</exclude>
+-					</excludes>
++					<classifier>exec</classifier>
+ 				</configuration>
+ 			</plugin>
++
+ 			<plugin>
+ 				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-compiler-plugin</artifactId>
+-				<executions>
+-					<execution>
+-						<id>default-compile</id>
+-						<phase>compile</phase>
+-						<goals>
+-							<goal>compile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-					<execution>
+-						<id>default-testCompile</id>
+-						<phase>test-compile</phase>
+-						<goals>
+-							<goal>testCompile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-				</executions>
++				<configuration>
++					<annotationProcessorPaths>
++						<path>
++							<groupId>org.projectlombok</groupId>
++							<artifactId>lombok</artifactId>
++						</path>
++					</annotationProcessorPaths>
++				</configuration>
+ 			</plugin>
+ 		</plugins>
+ 	</build>
+-
+-</project>
++</project>
+\ No newline at end of file
+Index: DelishGo/producto-mscv/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n\txsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n\t<modelVersion>4.0.0</modelVersion>\r\n\t<parent>\r\n\t\t<groupId>org.food</groupId>\r\n\t\t<artifactId>DelishGo</artifactId>\r\n\t\t<version>1.0-SNAPSHOT</version> <!-- lookup parent from repository -->\r\n\t</parent>\r\n\t<groupId>com.delishgo</groupId>\r\n\t<artifactId>producto-mscv</artifactId>\r\n\t<version>0.0.1-SNAPSHOT</version>\r\n\t<name/>\r\n\t<description/>\r\n\t<url/>\r\n\t<licenses>\r\n\t\t<license/>\r\n\t</licenses>\r\n\t<developers>\r\n\t\t<developer/>\r\n\t</developers>\r\n\t<scm>\r\n\t\t<connection/>\r\n\t\t<developerConnection/>\r\n\t\t<tag/>\r\n\t\t<url/>\r\n\t</scm>\r\n\t<properties>\r\n\t\t<java.version>21</java.version>\r\n\t\t<spring-cloud.version>2025.1.1</spring-cloud.version>\r\n\t</properties>\r\n\t<dependencies>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-h2console</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t<artifactId>spring-cloud-starter-openfeign</artifactId>\r\n\t\t</dependency>\r\n\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-devtools</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.h2database</groupId>\r\n\t\t\t<artifactId>h2</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.mysql</groupId>\r\n\t\t\t<artifactId>mysql-connector-j</artifactId>\r\n\t\t\t<scope>runtime</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-jpa-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-validation-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-webmvc-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t</dependencies>\r\n\t<dependencyManagement>\r\n\t\t<dependencies>\r\n\t\t\t<dependency>\r\n\t\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t\t<artifactId>spring-cloud-dependencies</artifactId>\r\n\t\t\t\t<version>${spring-cloud.version}</version>\r\n\t\t\t\t<type>pom</type>\r\n\t\t\t\t<scope>import</scope>\r\n\t\t\t</dependency>\r\n\t\t</dependencies>\r\n\t</dependencyManagement>\r\n\r\n\t<build>\r\n\t\t<plugins>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t\t<artifactId>spring-boot-maven-plugin</artifactId>\r\n\t\t\t\t<configuration>\r\n\t\t\t\t\t<excludes>\r\n\t\t\t\t\t\t<exclude>\r\n\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t</exclude>\r\n\t\t\t\t\t</excludes>\r\n\t\t\t\t</configuration>\r\n\t\t\t</plugin>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.apache.maven.plugins</groupId>\r\n\t\t\t\t<artifactId>maven-compiler-plugin</artifactId>\r\n\t\t\t\t<executions>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-compile</id>\r\n\t\t\t\t\t\t<phase>compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>compile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t\t<execution>\r\n\t\t\t\t\t\t<id>default-testCompile</id>\r\n\t\t\t\t\t\t<phase>test-compile</phase>\r\n\t\t\t\t\t\t<goals>\r\n\t\t\t\t\t\t\t<goal>testCompile</goal>\r\n\t\t\t\t\t\t</goals>\r\n\t\t\t\t\t\t<configuration>\r\n\t\t\t\t\t\t\t<annotationProcessorPaths>\r\n\t\t\t\t\t\t\t\t<path>\r\n\t\t\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t\t\t</path>\r\n\t\t\t\t\t\t\t</annotationProcessorPaths>\r\n\t\t\t\t\t\t</configuration>\r\n\t\t\t\t\t</execution>\r\n\t\t\t\t</executions>\r\n\t\t\t</plugin>\r\n\t\t</plugins>\r\n\t</build>\r\n\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DelishGo/producto-mscv/pom.xml b/DelishGo/producto-mscv/pom.xml
+--- a/DelishGo/producto-mscv/pom.xml	(revision c38e2cec208628e9c2b46c83372aabb3b826860e)
++++ b/DelishGo/producto-mscv/pom.xml	(date 1782772358756)
+@@ -1,13 +1,12 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 	<modelVersion>4.0.0</modelVersion>
+ 	<parent>
+ 		<groupId>org.food</groupId>
+ 		<artifactId>DelishGo</artifactId>
+-		<version>1.0-SNAPSHOT</version> <!-- lookup parent from repository -->
+-	</parent>
+-	<groupId>com.delishgo</groupId>
++		<version>1.0-SNAPSHOT</version> </parent>
++	<groupId>com.delishGo-MSCVs</groupId>
+ 	<artifactId>producto-mscv</artifactId>
+ 	<version>0.0.1-SNAPSHOT</version>
+ 	<name/>
+@@ -32,10 +31,6 @@
+ 	<dependencies>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+-			<artifactId>spring-boot-h2console</artifactId>
+-		</dependency>
+-		<dependency>
+-			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+ 		</dependency>
+ 		<dependency>
+@@ -67,11 +62,31 @@
+ 			<artifactId>mysql-connector-j</artifactId>
+ 			<scope>runtime</scope>
+ 		</dependency>
++		<dependency>
++			<groupId>org.postgresql</groupId>
++			<artifactId>postgresql</artifactId>
++			<scope>runtime</scope>
++		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.projectlombok</groupId>
+ 			<artifactId>lombok</artifactId>
+ 			<optional>true</optional>
+ 		</dependency>
++
++		<dependency>
++			<groupId>com.delishGo-MSCVs</groupId>
++			<artifactId>cliente-mscv</artifactId>
++			<version>0.0.1-SNAPSHOT</version>
++			<scope>compile</scope>
++		</dependency>
++		<dependency>
++			<groupId>com.delishGo-MSCVs</groupId>
++			<artifactId>restaurante-mscv</artifactId>
++			<version>0.0.1-SNAPSHOT</version>
++			<scope>compile</scope>
++		</dependency>
++
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+@@ -117,40 +132,15 @@
+ 			<plugin>
+ 				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-compiler-plugin</artifactId>
+-				<executions>
+-					<execution>
+-						<id>default-compile</id>
+-						<phase>compile</phase>
+-						<goals>
+-							<goal>compile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-					<execution>
+-						<id>default-testCompile</id>
+-						<phase>test-compile</phase>
+-						<goals>
+-							<goal>testCompile</goal>
+-						</goals>
+-						<configuration>
+-							<annotationProcessorPaths>
+-								<path>
+-									<groupId>org.projectlombok</groupId>
+-									<artifactId>lombok</artifactId>
+-								</path>
+-							</annotationProcessorPaths>
+-						</configuration>
+-					</execution>
+-				</executions>
++				<configuration>
++					<annotationProcessorPaths>
++						<path>
++							<groupId>org.projectlombok</groupId>
++							<artifactId>lombok</artifactId>
++						</path>
++					</annotationProcessorPaths>
++				</configuration>
+ 			</plugin>
+ 		</plugins>
+ 	</build>
+-
+-</project>
++</project>
+\ No newline at end of file
