@@ -22,20 +22,24 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and test cliente-mscv
+      # 1. Instalamos Cliente en la bóveda de Maven (Pedido lo necesita)
+      - name: Build and install cliente-mscv
         working-directory: cliente-mscv
-        run: mvn clean verify -B
+        run: mvn clean install -B
 
+      # 2. Instalamos Restaurante en la bóveda de Maven (Pedido lo necesita)
+      - name: Build and install restaurante-mscv
+        working-directory: restaurante-mscv
+        run: mvn clean install -B
+
+      # 3. Producto es independiente, lo instalamos igual
+      - name: Build and install producto-mscv
+        working-directory: producto-mscv
+        run: mvn clean install -B
+
+      # 4. Pedido se compila al final: ahora SÍ encontrará las dependencias instaladas previamente
       - name: Build and test pedido-mscv
         working-directory: pedido-mscv
-        run: mvn clean verify -B
-
-      - name: Build and test producto-mscv
-        working-directory: producto-mscv
-        run: mvn clean verify -B
-
-      - name: Build and test restaurante-mscv
-        working-directory: restaurante-mscv
         run: mvn clean verify -B
 
   build-and-test-frontend:
@@ -50,7 +54,7 @@ jobs:
           node-version: '20'
 
       - name: Install and build frontend
-        working-directory: .
+        working-directory: delishgo-frontend
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: |
@@ -77,7 +81,7 @@ jobs:
           docker build \
             --build-arg VITE_API_URL="$VITE_API_URL" \
             --build-arg VITE_BUILD_MODE="$VITE_BUILD_MODE" \
-            -t delishgo-frontend:latest .
+            -t delishgo-frontend:latest ./delishgo-frontend
 
   deploy-aws:
     needs: docker-build
@@ -131,11 +135,11 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:latest
 
-          # 5. Frontend delishgo (Usa directamente la raíz ".")
+          # 5. Frontend delishgo
           docker build \
             --build-arg VITE_API_URL="$VITE_API_URL" \
             --build-arg VITE_BUILD_MODE="$VITE_BUILD_MODE" \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:$IMAGE_TAG .
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:$IMAGE_TAG ./delishgo-frontend
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:latest
