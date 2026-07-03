@@ -10,6 +10,7 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
+  # Unificamos el compilado del backend y la creacion de imagenes locales para que compartan los archivos .jar
   build-and-test-backend:
     runs-on: ubuntu-latest
     steps:
@@ -22,9 +23,17 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # CON ESTO SE COMPILA TODO EL BACKEND EN ORDEN DE FORMA AUTOMÁTICA
-      - name: Build and install entire backend project
-        run: mvn clean install -B
+      # Forzamos la compilación completa de los JAR ejecutables dentro del contenedor
+      - name: Build and package entire backend project
+        run: mvn clean package install -DskipTests -B
+
+      # Construcción de imágenes locales compartiendo el mismo espacio de trabajo
+      - name: Build Docker images (Local Verification)
+        run: |
+          docker build -t cliente-mscv:latest ./cliente-mscv
+          docker build -t pedido-mscv:latest ./pedido-mscv
+          docker build -t producto-mscv:latest ./producto-mscv
+          docker build -t restaurante-mscv:latest ./restaurante-mscv
 
   build-and-test-frontend:
     runs-on: ubuntu-latest
@@ -45,30 +54,9 @@ jobs:
           npm install
           npm run build -- --mode ${{ vars.VITE_BUILD_MODE }}
 
-  docker-build:
-    needs: [build-and-test-backend, build-and-test-frontend]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'qa' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Docker images
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-          VITE_BUILD_MODE: ${{ vars.VITE_BUILD_MODE }}
-        run: |
-          docker build -t cliente-mscv:latest ./cliente-mscv
-          docker build -t pedido-mscv:latest ./pedido-mscv
-          docker build -t producto-mscv:latest ./producto-mscv
-          docker build -t restaurante-mscv:latest ./restaurante-mscv
-          docker build \
-            --build-arg VITE_API_URL="$VITE_API_URL" \
-            --build-arg VITE_BUILD_MODE="$VITE_BUILD_MODE" \
-            -t delishgo-frontend:latest ./delishgo-frontend
-
   deploy-aws:
-    needs: docker-build
+    # Este job se ejecuta solo si el backend y el frontend pasaron exitosamente sus pruebas
+    needs: [build-and-test-backend, build-and-test-frontend]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'qa' }}
@@ -82,6 +70,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_REGION || env.AWS_REGION }}
+
+      - name: Set up JDK 21 for Deploy Build
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # Volvemos a compilar los JAR dentro de este nuevo entorno limpio de despliegue antes de construir las imágenes ECR
+      - name: Re-build JARs for AWS ECR production deployment
+        run: mvn clean package install -DskipTests -B
 
       - name: Login to Amazon ECR
         id: login-ecr
