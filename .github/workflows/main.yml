@@ -33,7 +33,7 @@ jobs:
           docker build -t cliente-mscv:latest ./cliente-mscv
           docker build -t pedido-mscv:latest ./pedido-mscv
           docker build -t producto-mscv:latest ./producto-mscv
-          docker build -t restaurante-mscv:latest ./restaurante-mscv
+          docker build -t restaurant-mscv:latest ./restaurant-mscv
 
   build-and-test-frontend:
     runs-on: ubuntu-latest
@@ -113,7 +113,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           
           # 4. Microservicio Restaurante (Carpeta con 'e', Repositorio AWS sin 'e')
-               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG ./restaurante-mscv
+               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG ./restaurant-mscv
                docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG
                docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
                docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
@@ -160,7 +160,7 @@ jobs:
             export CLIENTE_IMAGE="${ECR_REGISTRY}/delishgo-cliente-mscv:latest"
             export PEDIDO_IMAGE="${ECR_REGISTRY}/delishgo-pedido-mscv:latest"
             export PRODUCTO_IMAGE="${ECR_REGISTRY}/delishgo-producto-mscv:latest"
-            export RESTAURANTE_IMAGE="${ECR_REGISTRY}/delishgo-restaurant-mscv:latest"
+            export RESTAURANT_IMAGE="${ECR_REGISTRY}/delishgo-restaurant-mscv:latest"
             export FRONTEND_IMAGE="${ECR_REGISTRY}/delishgo-frontend:latest"
             export CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}"
 
