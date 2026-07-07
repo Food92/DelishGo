@@ -21,7 +21,7 @@ services:
     depends_on:
       - producto-mscv
       - cliente-mscv
-      - restaurant-mscv
+      - restaurante-mscv # 👇 Corregido
       - pedido-mscv
 
   producto-mscv:
@@ -46,7 +46,7 @@ services:
     deploy:
       replicas: 1
 
-  restaurant-mscv:
+  restaurante-mscv: # 👇 Nombre de servicio unificado con 'e'
     image: ${RESTAURANTE_IMAGE}
     ports:
       - "8085:8085"
@@ -65,7 +65,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       PRODUCTO_SERVICE_URL: http://producto-mscv:8084/api/v1/producto
       CLIENTE_SERVICE_URL: http://cliente-mscv:8081/api/v1/cliente
-      RESTAURANT_SERVICE_URL: http://restaurant-mscv:8085/api/v1/restaurant
+      # 👇 URL interna de comunicación corregida con 'e'
+      RESTAURANT_SERVICE_URL: http://restaurante-mscv:8085/api/v1/restaurant
     networks:
       - delishgo-network
     deploy:
