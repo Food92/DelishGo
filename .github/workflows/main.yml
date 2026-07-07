@@ -143,12 +143,59 @@ jobs:
           host: ${{ github.ref == 'refs/heads/main' && secrets.EC2_PROD_HOST || secrets.EC2_QA_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          # AQUÍ ESTÁ EL TRUCO: Pasamos las credenciales de AWS al entorno de la máquina virtual (EC2)
           envs: ECR_REGISTRY,AWS_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,CORS_ALLOWED_ORIGINS
           script: |
             set -e
             DEPLOY_DIR="/home/${{ secrets.EC2_USER }}/delishgo"
             cd "${DEPLOY_DIR}"
+            
+            # 1. Destruimos la carpeta falsa generada previamente por Docker para liberar el espacio
+            rm -rf nginx.conf
+            
+            # 2. Inyectamos la estructura limpia de Nginx directamente como archivo de texto real
+            cat << 'EOF' > nginx.conf
+            events { worker_connections 1024; }
+
+            http {
+                server {
+                    listen 80;
+
+                    # Cabeceras globales de CORS
+                    add_header 'Access-Control-Allow-Origin' '*' always;
+                    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+                    add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, Accept, Origin' always;
+
+                    if ($request_method = 'OPTIONS') {
+                        return 204;
+                    }
+
+                    location /api/v1/productos {
+                        proxy_pass http://producto-mscv:8084;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+
+                    location /api/v1/clientes {
+                        proxy_pass http://cliente-mscv:8081;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+
+                    location /api/v1/restaurantes {
+                        proxy_pass http://restaurante-mscv:8085;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+
+                    location /api/v1/pedidos {
+                        proxy_pass http://pedido-mscv:8083;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+                }
+            }
+            EOF
+            
             test -f docker-compose.prod.yml
             
             export CLIENTE_IMAGE="${ECR_REGISTRY}/delishgo-cliente-mscv:latest"
@@ -158,16 +205,11 @@ jobs:
             export FRONTEND_IMAGE="${ECR_REGISTRY}/delishgo-frontend:latest"
             export CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}"
             
-            # 👇 INSTALACIÓN MANUAL COMPATIBLE CON CUALQUIER LINUX (Amazon Linux, RedHat, etc.)
             if ! docker compose version > /dev/null 2>&1; then
               echo "Instalando Docker Compose CLI Plugin manualmente..."
-              # Crea el directorio de plugins para el usuario actual si no existe
               mkdir -p ~/.docker/cli-plugins/
-              # Descarga la última versión estable (v2.29.2) directamente de Docker
               curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
-              # Le asigna permisos de ejecución obligatorios
               chmod +x ~/.docker/cli-plugins/docker-compose
-              echo "Docker Compose instalado con éxito:"
               docker compose version
             fi
             
