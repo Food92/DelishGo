@@ -2,22 +2,18 @@ version: '3.8'
 
 services:
   frontend:
-    build:
-      context: ./delishgo-frontend
-      dockerfile: Dockerfile
-    image: frontend:1.0
+    image: ${FRONTEND_IMAGE}
     ports:
-      - "3000:80"   # Tu frontend sigue en el puerto 3000
+      - "3000:80"
     networks:
       - delishgo-network
     deploy:
       replicas: 1
 
-  # --- EL NUEVO COMPONENTE: GATEWAY ---
   gateway:
     image: nginx:alpine
     ports:
-      - "8080:80"   # Toda la comunicación externa de las APIs irá por el puerto 8080
+      - "8080:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
@@ -29,9 +25,7 @@ services:
       - pedido-mscv
 
   producto-mscv:
-    image: producto-mscv:1.0
-    # Ya no necesitas exponer estos puertos al exterior obligatoriamente, 
-    # pero puedes dejarlos si quieres probarlos de forma independiente.
+    image: ${PRODUCTO_IMAGE}
     ports:
       - "8084:8084"
     networks:
@@ -40,20 +34,20 @@ services:
       replicas: 1
 
   cliente-mscv:
-    image: cliente-mscv:1.0
+    image: ${CLIENTE_IMAGE}
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/clientes_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Jesusestlatjrs92
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     networks:
       - delishgo-network
     deploy:
       replicas: 1
 
   restaurant-mscv:
-    image: restaurante-mscv:1.0
+    image: ${RESTAURANTE_IMAGE}
     ports:
       - "8085:8085"
     networks:
@@ -62,13 +56,13 @@ services:
       replicas: 1
 
   pedido-mscv:
-    image: pedido-mscv:1.0
+    image: ${PEDIDO_IMAGE}
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/pedidos_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Jesusestlatjrs92
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       PRODUCTO_SERVICE_URL: http://producto-mscv:8084/api/v1/producto
       CLIENTE_SERVICE_URL: http://cliente-mscv:8081/api/v1/cliente
       RESTAURANT_SERVICE_URL: http://restaurant-mscv:8085/api/v1/restaurant
@@ -79,4 +73,4 @@ services:
 
 networks:
   delishgo-network:
-    driver: overlay
+    driver: bridge

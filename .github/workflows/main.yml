@@ -1,5 +1,3 @@
-name: CI/CD DelishGo
-
 on:
   push:
     branches: [main, develop]
@@ -10,7 +8,6 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  # Unificamos el compilado del backend y la creacion de imagenes locales para que compartan los archivos .jar
   build-and-test-backend:
     runs-on: ubuntu-latest
     steps:
@@ -23,11 +20,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Forzamos la compilación completa de los JAR ejecutables dentro del contenedor
       - name: Build and package entire backend project
         run: mvn clean package install -DskipTests -B
 
-      # Construcción de imágenes locales compartiendo el mismo espacio de trabajo
       - name: Build Docker images (Local Verification)
         run: |
           docker build -t cliente-mscv:latest ./cliente-mscv
@@ -55,7 +50,6 @@ jobs:
           npm run build -- --mode ${{ vars.VITE_BUILD_MODE }}
 
   deploy-aws:
-    # Este job se ejecuta solo si el backend y el frontend pasaron exitosamente sus pruebas
     needs: [build-and-test-backend, build-and-test-frontend]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
@@ -78,7 +72,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Volvemos a compilar los JAR dentro de este nuevo entorno limpio de despliegue antes de construir las imágenes ECR
       - name: Re-build JARs for AWS ECR production deployment
         run: mvn clean package install -DskipTests -B
 
@@ -94,31 +87,26 @@ jobs:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_BUILD_MODE: ${{ vars.VITE_BUILD_MODE }}
         run: |
-          # 1. Microservicio Cliente
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG ./cliente-mscv
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:latest
 
-          # 2. Microservicio Pedido
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG ./pedido-mscv
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:latest
 
-          # 3. Microservicio Producto
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG ./producto-mscv
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           
-          # 4. Microservicio Restaurante (Carpeta con 'e', Repositorio AWS sin 'e')
-               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG ./restaurant-mscv
-               docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG
-               docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
-               docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG ./restaurant-mscv
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
 
-          # 5. Frontend delishgo
           docker build \
             --build-arg VITE_API_URL="$VITE_API_URL" \
             --build-arg VITE_BUILD_MODE="$VITE_BUILD_MODE" \
@@ -160,10 +148,12 @@ jobs:
             export CLIENTE_IMAGE="${ECR_REGISTRY}/delishgo-cliente-mscv:latest"
             export PEDIDO_IMAGE="${ECR_REGISTRY}/delishgo-pedido-mscv:latest"
             export PRODUCTO_IMAGE="${ECR_REGISTRY}/delishgo-producto-mscv:latest"
-            export RESTAURANT_IMAGE="${ECR_REGISTRY}/delishgo-restaurant-mscv:latest"
+            export RESTAURANTE_IMAGE="${ECR_REGISTRY}/delishgo-restaurant-mscv:latest"
             export FRONTEND_IMAGE="${ECR_REGISTRY}/delishgo-frontend:latest"
             export CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}"
 
             aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
+            
+            # Aquí se ejecuta la corrección limpia sin errores de análisis sintáctico
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
