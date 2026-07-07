@@ -102,7 +102,6 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           
-          # 👇 CORREGIDO CON 'E' EN EL CONTENEDOR Y EN EL REPOSITORIO DE AWS
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG ./restaurante-mscv
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:latest
@@ -149,10 +148,15 @@ jobs:
             export CLIENTE_IMAGE="${ECR_REGISTRY}/delishgo-cliente-mscv:latest"
             export PEDIDO_IMAGE="${ECR_REGISTRY}/delishgo-pedido-mscv:latest"
             export PRODUCTO_IMAGE="${ECR_REGISTRY}/delishgo-producto-mscv:latest"
-            # 👇 REPOSITORIO DE AWS CORREGIDO CON 'E'
             export RESTAURANTE_IMAGE="${ECR_REGISTRY}/delishgo-restaurante-mscv:latest"
             export FRONTEND_IMAGE="${ECR_REGISTRY}/delishgo-frontend:latest"
             export CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}"
+
+            # Instala de forma segura docker-compose-plugin si no se encuentra en la máquina virtual
+            if ! docker compose version > /dev/null 2>&1; then
+              echo "Instalando de forma automatica docker-compose-plugin en remoto..."
+              sudo apt-get update -y && sudo apt-get install -y docker-compose-plugin
+            fi
 
             aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
             
