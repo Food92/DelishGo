@@ -1,40 +1,177 @@
-- name: Desplegar en el Servidor Remoto
-        uses: appleboy/ssh-action@master  # O la acción de SSH que estés usando
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  build-and-test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          host: ${{ secrets.INPUT_HOST }}
-          username: ${{ secrets.INPUT_USERNAME }}
-          key: ${{ secrets.INPUT_KEY }}
-          port: ${{ secrets.INPUT_PORT }}
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and package entire backend project
+        run: mvn clean package install -DskipTests -B
+
+      - name: Build Docker images (Local Verification)
+        run: |
+          docker build -t cliente-mscv:latest ./cliente-mscv
+          docker build -t pedido-mscv:latest ./pedido-mscv
+          docker build -t producto-mscv:latest ./producto-mscv
+          docker build -t restaurante-mscv:latest ./restaurante-mscv
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'pull_request' && (github.base_ref == 'main' && 'prod' || 'qa') || (github.ref == 'refs/heads/main' && 'prod' || 'qa') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install and build frontend
+        working-directory: delishgo-frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          npm install
+          npm run build -- --mode ${{ vars.VITE_BUILD_MODE }}
+
+  deploy-aws:
+    needs: [build-and-test-backend, build-and-test-frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'qa' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION || env.AWS_REGION }}
+
+      - name: Set up JDK 21 for Deploy Build
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Re-build JARs for AWS ECR production deployment
+        run: mvn clean package install -DskipTests -B
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag and push images to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY_PREFIX: delishgo
+          IMAGE_TAG: ${{ github.sha }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_BUILD_MODE: ${{ vars.VITE_BUILD_MODE }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG ./cliente-mscv
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:latest
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG ./pedido-mscv
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:latest
+
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG ./producto-mscv
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
+          
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG ./restaurante-mscv
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:latest
+
+          docker build \
+            --build-arg VITE_API_URL="$VITE_API_URL" \
+            --build-arg VITE_BUILD_MODE="$VITE_BUILD_MODE" \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:$IMAGE_TAG ./delishgo-frontend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-frontend:latest
+
+      - name: Copy deploy files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ github.ref == 'refs/heads/main' && secrets.EC2_PROD_HOST || secrets.EC2_QA_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/home/${{ secrets.EC2_USER }}/delishgo/"
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          SPRING_PROFILES_ACTIVE: ${{ vars.SPRING_PROFILES_ACTIVE }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+        with:
+          host: ${{ github.ref == 'refs/heads/main' && secrets.EC2_PROD_HOST || secrets.EC2_QA_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # AQUÍ ESTÁ EL TRUCO: Pasamos las credenciales de AWS al entorno de la máquina virtual (EC2)
+          envs: ECR_REGISTRY,AWS_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,CORS_ALLOWED_ORIGINS
           script: |
             set -e
-            DEPLOY_DIR="/home/${{ secrets.INPUT_USERNAME }}/delishgo"
+            DEPLOY_DIR="/home/${{ secrets.EC2_USER }}/delishgo"
             cd "${DEPLOY_DIR}"
-
-            # 1. Borramos la carpeta falsa generada por Docker para abrir paso al archivo real
-            rm -rf nginx.conf
-
-            # 2. Tu validación habitual de que el compose esté ahí
             test -f docker-compose.prod.yml
-
-            # 3. Exportar variables de entorno de las imágenes
-            export CLIENTE_IMAGE="${{ secrets.ECR_REGISTRY }}/delishgo-cliente-mscv:latest"
-            export PEDIDO_IMAGE="${{ secrets.ECR_REGISTRY }}/delishgo-pedido-mscv:latest"
-            export PRODUCTO_IMAGE="${{ secrets.ECR_REGISTRY }}/delishgo-producto-mscv:latest"
-            export RESTAURANTE_IMAGE="${{ secrets.ECR_REGISTRY }}/delishgo-restaurante-mscv:latest"
-            export FRONTEND_IMAGE="${{ secrets.ECR_REGISTRY }}/delishgo-frontend:latest"
-            export CORS_ALLOWED_ORIGINS="${{ secrets.CORS_ALLOWED_ORIGINS }}"
-
-            # 4. Instalación/Verificación de Docker Compose
+            
+            export CLIENTE_IMAGE="${ECR_REGISTRY}/delishgo-cliente-mscv:latest"
+            export PEDIDO_IMAGE="${ECR_REGISTRY}/delishgo-pedido-mscv:latest"
+            export PRODUCTO_IMAGE="${ECR_REGISTRY}/delishgo-producto-mscv:latest"
+            export RESTAURANTE_IMAGE="${ECR_REGISTRY}/delishgo-restaurante-mscv:latest"
+            export FRONTEND_IMAGE="${ECR_REGISTRY}/delishgo-frontend:latest"
+            export CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}"
+            
+            # 👇 INSTALACIÓN MANUAL COMPATIBLE CON CUALQUIER LINUX (Amazon Linux, RedHat, etc.)
             if ! docker compose version > /dev/null 2>&1; then
               echo "Instalando Docker Compose CLI Plugin manualmente..."
+              # Crea el directorio de plugins para el usuario actual si no existe
               mkdir -p ~/.docker/cli-plugins/
+              # Descarga la última versión estable (v2.29.2) directamente de Docker
               curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+              # Le asigna permisos de ejecución obligatorios
               chmod +x ~/.docker/cli-plugins/docker-compose
+              echo "Docker Compose instalado con éxito:"
               docker compose version
             fi
-
-            # 5. Login en AWS ECR y Despliegue
-            aws ecr get-login-password --region "${{ secrets.AWS_REGION }}" | docker login --username AWS --password-stdin "${{ secrets.ECR_REGISTRY }}"
-
+            
+            aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
+            
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
