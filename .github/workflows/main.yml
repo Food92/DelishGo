@@ -1,3 +1,5 @@
+name: CI/CD Pipeline
+
 on:
   push:
     branches: [main, develop]
@@ -129,6 +131,9 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           SPRING_PROFILES_ACTIVE: ${{ vars.SPRING_PROFILES_ACTIVE }}
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
           SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
@@ -138,9 +143,14 @@ jobs:
           host: ${{ github.ref == 'refs/heads/main' && secrets.EC2_PROD_HOST || secrets.EC2_QA_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_REGISTRY,AWS_REGION,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,CORS_ALLOWED_ORIGINS
+          # AQUÍ ESTÁ EL TRUCO: Pasamos las credenciales de AWS al entorno de la máquina virtual (EC2)
+          envs: ECR_REGISTRY,AWS_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,CORS_ALLOWED_ORIGINS
           script: |
             set -e
+            
+            # EVITA QUE APT-GET TIRE POPUPS INTERACTIVOS QUE CONGELAN EL SCRIPT
+            export DEBIAN_FRONTEND=noninteractive
+            
             DEPLOY_DIR="/home/${{ secrets.EC2_USER }}/delishgo"
             cd "${DEPLOY_DIR}"
             test -f docker-compose.prod.yml
@@ -158,6 +168,7 @@ jobs:
               sudo apt-get update -y && sudo apt-get install -y docker-compose-plugin
             fi
 
+            # Ahora el EC2 sí tiene permisos temporales para ejecutar el login en AWS ECR
             aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
             
             docker compose -f docker-compose.prod.yml pull
