@@ -1,9 +1,11 @@
 package com.delishGo_MSCVs.restaurante_mscv.services;
 
-
 import com.delishGo_MSCVs.restaurante_mscv.exception.RestaurantException;
 import com.delishGo_MSCVs.restaurante_mscv.models.Restaurant;
 import com.delishGo_MSCVs.restaurante_mscv.repositories.RestaurantRespository;
+// 👇 Importación de AWS SQS
+import io.awspring.cloud.sqs.annotation.SqsListener;
+// 👆
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,6 @@ public class RestaurantImpl implements RestaurantService {
             throw new RestaurantException("Ya existe una restaurante con el ID: "+restaurant.getIdRestaurant());
         }
         return restaurantRespository.save(restaurant);
-
     }
 
     @Transactional
@@ -51,7 +52,6 @@ public class RestaurantImpl implements RestaurantService {
             throw new RestaurantException("Restaurant con ID: "+idRestaurant+" no existe");
         }
         restaurantRespository.deleteById(idRestaurant);
-
     }
 
     @Transactional
@@ -66,5 +66,17 @@ public class RestaurantImpl implements RestaurantService {
         existente.setCorreo(restaurant.getCorreo());
 
         return restaurantRespository.save(existente);
+    }
+
+    // 🚀 👇 ESCUCHAR MENSAJES DE SQS 👇 🚀
+    // Recibimos el mensaje como String (JSON) para que no haya problemas de acoplamiento.
+    @SqsListener("${AWS_SQS_QUEUE_URL}")
+    public void recibirNotificacionNuevoPedido(String jsonPedidoEvent) {
+        System.out.println("🔔 ¡ATENCIÓN RESTAURANTE! 🔔");
+        System.out.println("Ha ingresado un nuevo pedido desde la cola SQS:");
+        System.out.println(jsonPedidoEvent);
+
+        // Aquí puedes agregar la lógica para notificar a un WebSocket del frontend,
+        // guardarlo en una base de datos local de "tickets", etc.
     }
 }

@@ -1,4 +1,4 @@
-name: CI/CD DelishGo
+name: CI/CD Pipeline
 
 on:
   push:
@@ -15,7 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-          # Configuración del entorno de Java idéntico a tu plantilla
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -23,21 +22,15 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and test cliente-mscv
-        working-directory: delishgo_cliente-mscv
-        run: mvn clean verify -B
+      - name: Build and package entire backend project
+        run: mvn clean package install -DskipTests -B
 
-      - name: Build and test pedido-mscv
-        working-directory: delishgo_pedido-mscv
-        run: mvn clean verify -B
-
-      - name: Build and test producto-mscv
-        working-directory: delishgo_producto-mscv
-        run: mvn clean verify -B
-
-      - name: Build and test restaurant-mscv
-        working-directory: delishgo_restaurant-mscv
-        run: mvn clean verify -B
+      - name: Build Docker images (Local Verification)
+        run: |
+          docker build -t cliente-mscv:latest ./cliente-mscv
+          docker build -t pedido-mscv:latest ./pedido-mscv
+          docker build -t producto-mscv:latest ./producto-mscv
+          docker build -t restaurante-mscv:latest ./restaurante-mscv
 
   build-and-test-frontend:
     runs-on: ubuntu-latest
@@ -58,35 +51,11 @@ jobs:
           npm install
           npm run build -- --mode ${{ vars.VITE_BUILD_MODE }}
 
-  docker-build:
-    needs: [build-and-test-backend, build-and-test-frontend]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'qa' }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Docker images
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-          VITE_BUILD_MODE: ${{ vars.VITE_BUILD_MODE }}
-        run: |
-          docker build -t cliente-mscv:latest ./delishgo_cliente-mscv
-          docker build -t pedido-mscv:latest ./delishgo_pedido-mscv
-          docker build -t producto-mscv:latest ./delishgo_producto-mscv
-          docker build -t restaurant-mscv:latest ./delishgo_restaurant-mscv
-          docker build \
-            --build-arg VITE_API_URL="$VITE_API_URL" \
-            --build-arg VITE_BUILD_MODE="$VITE_BUILD_MODE" \
-            -t delishgo-frontend:latest ./delishgo-frontend
-
   deploy-aws:
-    needs: docker-build
+    needs: [build-and-test-backend, build-and-test-frontend]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'qa' }}
-
     steps:
       - uses: actions/checkout@v4
 
@@ -97,6 +66,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_REGION || env.AWS_REGION }}
+
+      - name: Set up JDK 21 for Deploy Build
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Re-build JARs for AWS ECR production deployment
+        run: mvn clean package install -DskipTests -B
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -110,31 +89,26 @@ jobs:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_BUILD_MODE: ${{ vars.VITE_BUILD_MODE }}
         run: |
-          # 1. Microservicio Cliente
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG ./delishgo_cliente-mscv
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG ./cliente-mscv
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-cliente-mscv:latest
 
-          # 2. Microservicio Pedido
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG ./delishgo_pedido-mscv
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG ./pedido-mscv
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-pedido-mscv:latest
 
-          # 3. Microservicio Producto
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG ./delishgo_producto-mscv
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG ./producto-mscv
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-producto-mscv:latest
+          
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG ./restaurante-mscv
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurante-mscv:latest
 
-          # 4. Microservicio Restaurante
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG ./delishgo_restaurant-mscv
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PREFIX-restaurant-mscv:latest
-
-          # 5. Frontend delishgo
           docker build \
             --build-arg VITE_API_URL="$VITE_API_URL" \
             --build-arg VITE_BUILD_MODE="$VITE_BUILD_MODE" \
@@ -157,6 +131,9 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           SPRING_PROFILES_ACTIVE: ${{ vars.SPRING_PROFILES_ACTIVE }}
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
           SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
@@ -166,22 +143,77 @@ jobs:
           host: ${{ github.ref == 'refs/heads/main' && secrets.EC2_PROD_HOST || secrets.EC2_QA_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_REGISTRY,AWS_REGION,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,CORS_ALLOWED_ORIGINS
+          envs: ECR_REGISTRY,AWS_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,CORS_ALLOWED_ORIGINS
           script: |
             set -e
             DEPLOY_DIR="/home/${{ secrets.EC2_USER }}/delishgo"
             cd "${DEPLOY_DIR}"
+            
+            # 1. Destruimos la carpeta falsa generada previamente por Docker para liberar el espacio
+            rm -rf nginx.conf
+            
+            # 2. Inyectamos la estructura limpia de Nginx directamente como archivo de texto real
+            cat << 'EOF' > nginx.conf
+            events { worker_connections 1024; }
+
+            http {
+                server {
+                    listen 80;
+
+                    # Cabeceras globales de CORS
+                    add_header 'Access-Control-Allow-Origin' '*' always;
+                    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+                    add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, Accept, Origin' always;
+
+                    if ($request_method = 'OPTIONS') {
+                        return 204;
+                    }
+
+                    location /api/v1/productos {
+                        proxy_pass http://producto-mscv:8084;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+
+                    location /api/v1/clientes {
+                        proxy_pass http://cliente-mscv:8081;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+
+                    location /api/v1/restaurantes {
+                        proxy_pass http://restaurante-mscv:8085;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+
+                    location /api/v1/pedidos {
+                        proxy_pass http://pedido-mscv:8083;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                    }
+                }
+            }
+            EOF
+            
             test -f docker-compose.prod.yml
             
-            # Exportar dinámicamente las imágenes para que docker-compose.prod.yml las lea
             export CLIENTE_IMAGE="${ECR_REGISTRY}/delishgo-cliente-mscv:latest"
             export PEDIDO_IMAGE="${ECR_REGISTRY}/delishgo-pedido-mscv:latest"
             export PRODUCTO_IMAGE="${ECR_REGISTRY}/delishgo-producto-mscv:latest"
-            export RESTAURANT_IMAGE="${ECR_REGISTRY}/delishgo-restaurant-mscv:latest"
+            export RESTAURANTE_IMAGE="${ECR_REGISTRY}/delishgo-restaurante-mscv:latest"
             export FRONTEND_IMAGE="${ECR_REGISTRY}/delishgo-frontend:latest"
             export CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}"
             
-            # Autenticación e inicio del Stack en producción/QA
+            if ! docker compose version > /dev/null 2>&1; then
+              echo "Instalando Docker Compose CLI Plugin manualmente..."
+              mkdir -p ~/.docker/cli-plugins/
+              curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+              chmod +x ~/.docker/cli-plugins/docker-compose
+              docker compose version
+            fi
+            
             aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml up -d
+            
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d

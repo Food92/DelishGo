@@ -1,0 +1,90 @@
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    ports:
+      - "3000:80"
+    networks:
+      - delishgo-network
+    restart: always
+
+  gateway:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - delishgo-network
+    restart: always
+    depends_on:
+      - producto-mscv
+      - cliente-mscv
+      - restaurante-mscv
+      - pedido-mscv
+
+  producto-mscv:
+    image: ${PRODUCTO_IMAGE}
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    networks:
+      - delishgo-network
+    restart: always
+
+  cliente-mscv:
+    image: ${CLIENTE_IMAGE}
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    networks:
+      - delishgo-network
+    restart: always
+
+  restaurante-mscv:
+    image: ${RESTAURANTE_IMAGE}
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      # 🚀 Variables para consumir mensajes de SQS
+      AWS_SQS_QUEUE_URL: ${AWS_SQS_QUEUE_URL}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+    networks:
+      - delishgo-network
+    restart: always
+
+  pedido-mscv:
+    image: ${PEDIDO_IMAGE}
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      PRODUCTO_SERVICE_URL: http://producto-mscv:8084/api/v1/producto
+      CLIENTE_SERVICE_URL: http://cliente-mscv:8081/api/v1/cliente
+      RESTAURANT_SERVICE_URL: http://restaurante-mscv:8085/api/v1/restaurant
+      # 🚀 Variables para enviar mensajes a SQS
+      AWS_SQS_QUEUE_URL: ${AWS_SQS_QUEUE_URL}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+    networks:
+      - delishgo-network
+    restart: always
+
+networks:
+  delishgo-network:
+    driver: bridge

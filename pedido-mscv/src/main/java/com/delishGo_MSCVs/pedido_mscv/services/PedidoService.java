@@ -17,6 +17,8 @@ public interface PedidoService {
     List<PedidoResponseDTO> findByIdCliente(Long idCliente);
     List<PedidoResponseDTO> findByIdRestaurant(Long idRestaurant);
     List<PedidoResponseDTO> findByEstado(String estado);
+
+    PedidoResponseDTO procesarSiguientePedido();
 }
 
 
