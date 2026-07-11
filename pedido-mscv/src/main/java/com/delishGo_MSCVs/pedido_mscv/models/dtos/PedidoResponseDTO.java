@@ -14,6 +14,7 @@ import java.util.List;
 @Getter
 @ToString
 @NoArgsConstructor
+
 public class PedidoResponseDTO {
     private Long idPedido;
     private String estado;

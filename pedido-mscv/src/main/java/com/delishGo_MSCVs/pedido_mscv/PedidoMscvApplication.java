@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@EnableFeignClients
 @SpringBootApplication
+@EnableFeignClients(basePackages = "com.delishGo_MSCVs.pedido_mscv.client")
 public class PedidoMscvApplication {
 
 	public static void main(String[] args) {

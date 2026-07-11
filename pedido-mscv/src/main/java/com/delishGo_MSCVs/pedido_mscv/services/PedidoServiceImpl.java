@@ -1,21 +1,23 @@
 package com.delishGo_MSCVs.pedido_mscv.services;
 
-import com.delishGo_MSCVs.cliente_mscv.exception.ClienteException;
 import com.delishGo_MSCVs.pedido_mscv.client.ClienteClient;
-import com.delishGo_MSCVs.pedido_mscv.client.DetallePedidoClient;
 import com.delishGo_MSCVs.pedido_mscv.client.ProductoClient;
 import com.delishGo_MSCVs.pedido_mscv.client.RestaurantClient;
 import com.delishGo_MSCVs.pedido_mscv.exception.PedidoException;
 import com.delishGo_MSCVs.pedido_mscv.models.Pedido;
 import com.delishGo_MSCVs.pedido_mscv.models.dtos.*;
 import com.delishGo_MSCVs.pedido_mscv.repositories.PedidoRepository;
-import com.delishGo_MSCVs.restaurante_mscv.exception.RestaurantException;
+
+// 👇 Importaciones de AWS SQS
+import io.awspring.cloud.sqs.operations.SqsTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,14 +26,20 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private PedidoRepository pedidoRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private ClienteClient clienteClient;
 
-    @Autowired
+    @Autowired(required = false)
     private RestaurantClient restaurantClient;
 
-    @Autowired
+    @Autowired(required = false)
     private ProductoClient productoClient;
+
+    @Autowired
+    private SqsTemplate sqsTemplate;
+
+    @Value("${AWS_SQS_QUEUE_URL}")
+    private String queueUrl;
 
     @Override
     public List<PedidoResponseDTO> findAll() {
@@ -49,51 +57,38 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public PedidoResponseDTO save(PedidoDTO pedidoDTO) {
-        // Validar cliente
-        ClienteDTO clienteDTO = clienteClient.getClienteById(pedidoDTO.getIdCliente());
-        if (clienteDTO == null) {
-            throw new ClienteException("Cliente no encontrado con ID: " + pedidoDTO.getIdCliente());
-        }
-
-        // Validar restaurante
-        RestaurantDTO restaurantDTO = restaurantClient.getRestaurantById(pedidoDTO.getIdRestaurant());
-        if (restaurantDTO == null) {
-            throw new RestaurantException("Restaurante no encontrado con ID: " + pedidoDTO.getIdRestaurant());
-        }
-
-        // Validar detalles
         if (pedidoDTO.getDetallesPedido() == null || pedidoDTO.getDetallesPedido().isEmpty()) {
             throw new PedidoException("El pedido debe tener al menos un detalle");
         }
 
-        // Validar productos y asignar precio unitario
-        pedidoDTO.getDetallesPedido().forEach(detalle -> {
-            ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
-            if (producto == null) {
-                throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
-            }
-            detalle.setPrecioUnitario(producto.getPrecio());
-        });
-
-        // Calcular monto total
         double total = pedidoDTO.getDetallesPedido().stream()
                 .mapToDouble(DetallePedidoDTO::getSubtotal)
                 .sum();
 
-        // Guardar pedido
         Pedido pedido = new Pedido();
-        pedido.setIdCliente(clienteDTO.getIdCliente());
-        pedido.setIdRestaurant(restaurantDTO.getIdRestaurant());
+        pedido.setIdCliente(pedidoDTO.getIdCliente());
+        pedido.setIdRestaurant(pedidoDTO.getIdRestaurant());
         pedido.setMontoTotal(total);
-        pedido.setEstado(pedidoDTO.getEstado());
+        pedido.setEstado(pedidoDTO.getEstado() != null ? pedidoDTO.getEstado() : "PENDIENTE");
         pedido.setHoraPedido(LocalDateTime.now());
 
         Pedido savedPedido = pedidoRepository.save(pedido);
+        System.out.println("✅ Pedido guardado con éxito en H2 en memoria con ID: " + savedPedido.getIdPedido());
 
-        // Respuesta (solo devuelve lo que vino en el DTO)
         PedidoResponseDTO response = mapToResponse(savedPedido);
         response.setDetallesPedido(pedidoDTO.getDetallesPedido());
         response.setMontoTotal(total);
+
+        try {
+            sqsTemplate.send(to -> to
+                    .queue(queueUrl)
+                    .payload(response)
+            );
+            System.out.println("🚀 Mensaje enviado a SQS con éxito para el pedido ID: " + savedPedido.getIdPedido());
+        } catch (Exception e) {
+            System.err.println("❌ Error al despachar el mensaje a la cola SQS: " + e.getMessage());
+        }
+
         return response;
     }
 
@@ -102,17 +97,7 @@ public class PedidoServiceImpl implements PedidoService {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new PedidoException("Pedido con ID:" + id + " no encontrado"));
 
-        // Actualizar estado
         pedido.setEstado(pedidoDTO.getEstado());
-
-        // Validar productos y recalcular
-        pedidoDTO.getDetallesPedido().forEach(detalle -> {
-            ProductoDTO producto = productoClient.getProductoById(detalle.getIdProducto());
-            if (producto == null) {
-                throw new PedidoException("Producto no encontrado con ID: " + detalle.getIdProducto());
-            }
-            detalle.setPrecioUnitario(producto.getPrecio());
-        });
 
         double total = pedidoDTO.getDetallesPedido().stream()
                 .mapToDouble(DetallePedidoDTO::getSubtotal)
@@ -157,7 +142,38 @@ public class PedidoServiceImpl implements PedidoService {
                 .collect(Collectors.toList());
     }
 
-    // 🔧 Método privado para mapear entidad → DTO
+    // 🔄 LOGICA PARA PROCESAR EL SIGUIENTE MENSAJE DESDE SQS
+    @Override
+    public PedidoResponseDTO procesarSiguientePedido() {
+        try {
+            // Saca 1 mensaje de la cola convirtiéndolo a PedidoResponseDTO automáticamente
+            var messageOptional = sqsTemplate.receive(from -> from.queue(queueUrl), PedidoResponseDTO.class);
+
+            if (messageOptional.isPresent()) {
+                PedidoResponseDTO pedidoSqs = messageOptional.get().getPayload();
+                Long idPedido = pedidoSqs.getIdPedido();
+
+                System.out.println("📥 Mensaje extraído de SQS para procesar el Pedido ID: " + idPedido);
+
+                // Buscar en la base H2 para cambiar su estado
+                Pedido pedidoEnDb = pedidoRepository.findById(idPedido)
+                        .orElseThrow(() -> new PedidoException("El pedido con ID " + idPedido + " no existe en la BD H2"));
+
+                pedidoEnDb.setEstado("PROCESADO");
+                Pedido updatedPedido = pedidoRepository.save(pedidoEnDb);
+
+                System.out.println("✅ Estado del pedido ID " + idPedido + " actualizado a PROCESADO en H2.");
+                return mapToResponse(updatedPedido);
+            } else {
+                System.out.println("📋 No hay mensajes en la cola SQS pendientes.");
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error en el consumidor de SQS: " + e.getMessage());
+            throw new PedidoException("Error procesando mensaje de SQS: " + e.getMessage());
+        }
+    }
+
     private PedidoResponseDTO mapToResponse(Pedido pedido) {
         PedidoResponseDTO response = new PedidoResponseDTO();
         response.setIdPedido(pedido.getIdPedido());
@@ -166,10 +182,7 @@ public class PedidoServiceImpl implements PedidoService {
         response.setIdCliente(pedido.getIdCliente());
         response.setIdRestaurant(pedido.getIdRestaurant());
         response.setMontoTotal(pedido.getMontoTotal());
-
-        // ⚠️ Antes solo devolvías los detalles del DTO, no llamabas al microservicio
         response.setDetallesPedido(Collections.emptyList());
-
         return response;
     }
 }

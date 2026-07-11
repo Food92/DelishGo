@@ -1,6 +1,5 @@
 package com.delishGo_MSCVs.pedido_mscv.controllers;
 
-import com.delishGo_MSCVs.pedido_mscv.models.Pedido;
 import com.delishGo_MSCVs.pedido_mscv.models.dtos.PedidoDTO;
 import com.delishGo_MSCVs.pedido_mscv.models.dtos.PedidoResponseDTO;
 import com.delishGo_MSCVs.pedido_mscv.services.PedidoService;
@@ -23,27 +22,46 @@ public class PedidoController {
     @Autowired
     private PedidoService pedidoService;
 
-    // Obtener todos los pedidos
+    // 🔎 OBTENER TODOS LOS PEDIDOS (Usa: listar-pedidos-lambda)
     @GetMapping
     public ResponseEntity<List<PedidoResponseDTO>> getAllPedidos() {
         return ResponseEntity.ok(pedidoService.findAll());
     }
 
-    // Obtener pedido por ID
+    // 🔄 PROCESAR PEDIDO DESDE SQS (Usa: procesar-pedido-lambda)
+    @PostMapping("/procesar")
+    public ResponseEntity<?> procesarPedido() {
+        // 1. Llama a tu servicio que extrae y cambia el estado a PROCESADO en H2
+        var pedidoProcesado = pedidoService.procesarSiguientePedido();
+
+        // 2. Creamos el mapa para estructurar la respuesta idéntica a tu ejemplo
+        Map<String, String> respuesta = new HashMap<>();
+
+        if (pedidoProcesado != null) {
+            // Si había un mensaje en SQS y se procesó con éxito:
+            respuesta.put("message", "Solicitud recibida");
+            respuesta.put("status", "Pedido ID " + pedidoProcesado.getIdPedido() + " cambiado a PROCESADO");
+            return ResponseEntity.ok(respuesta); // Esto envía el HTTP 200 con tu JSON customizado
+        }
+
+        // Si entraste al endpoint pero SQS estaba vacío:
+        respuesta.put("message", "No hay pedidos en cola");
+        return ResponseEntity.ok(respuesta);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<PedidoResponseDTO> findById(@PathVariable Long id) {
         PedidoResponseDTO response = pedidoService.findById(id);
         return ResponseEntity.ok(response);
     }
 
-    // Crear pedido
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> save(@Valid @RequestBody PedidoDTO pedidoDTO) {
         PedidoResponseDTO response = pedidoService.save(pedidoDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Actualizar pedido
     @PutMapping("/{id}")
     public ResponseEntity<PedidoResponseDTO> updatePedido(@PathVariable Long id,
                                                           @RequestBody PedidoDTO pedidoDTO) {
@@ -51,7 +69,6 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoActualizado);
     }
 
-    // Eliminar pedido
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deletePedido(@PathVariable Long id) {
         pedidoService.deleteById(id);
@@ -60,23 +77,18 @@ public class PedidoController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔎 Buscar pedidos por cliente
     @GetMapping("/cliente/{idCliente}")
     public ResponseEntity<List<PedidoResponseDTO>> getByCliente(@PathVariable Long idCliente) {
         return ResponseEntity.ok(pedidoService.findByIdCliente(idCliente));
     }
 
-    // 🔎 Buscar pedidos por restaurante
     @GetMapping("/restaurante/{idRestaurant}")
     public ResponseEntity<List<PedidoResponseDTO>> getByRestaurante(@PathVariable Long idRestaurant) {
         return ResponseEntity.ok(pedidoService.findByIdRestaurant(idRestaurant));
     }
 
-    // 🔎 Buscar pedidos por estado
     @GetMapping("/estado/{estado}")
     public ResponseEntity<List<PedidoResponseDTO>> getByEstado(@PathVariable String estado) {
         return ResponseEntity.ok(pedidoService.findByEstado(estado));
     }
-
-
 }
