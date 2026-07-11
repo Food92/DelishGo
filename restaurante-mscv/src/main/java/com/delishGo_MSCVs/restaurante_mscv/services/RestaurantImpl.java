@@ -73,7 +73,7 @@ public class RestaurantImpl implements RestaurantService {
     @SqsListener("${AWS_SQS_QUEUE_URL}")
     public void recibirNotificacionNuevoPedido(String jsonPedidoEvent) {
         System.out.println("🔔 ¡ATENCIÓN RESTAURANTE! 🔔");
-        System.out.println("Ha ingresado un nuevo pedido desde la cola SQS:");
+        System.out.println("Ha ingresado un nuevo pedido desde la cola SQS y probando:");
         System.out.println(jsonPedidoEvent);
 
         // Aquí puedes agregar la lógica para notificar a un WebSocket del frontend,
